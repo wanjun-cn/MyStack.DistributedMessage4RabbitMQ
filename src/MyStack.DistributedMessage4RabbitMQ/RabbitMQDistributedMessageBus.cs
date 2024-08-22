@@ -34,19 +34,17 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             _logger = loggerFactory?.CreateLogger<RabbitMQDistributedMessageBus>();
         }
         protected RabbitMQOptions Options { get; private set; }
-        public async Task PublishAsync(IDistributedEvent eventData, CancellationToken cancellationToken = default)
+        private void AddHeaders(IBasicProperties basicProperties, object data, Dictionary<string, object>? metadata = null)
         {
-            using var channel = _rabbitMQProvider.CreateModel();
-            cancellationToken.ThrowIfCancellationRequested();
-            if (eventData == null)
-                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
-            // 生成路由键
-            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
-            var sendData = JsonConvert.SerializeObject(eventData);
-            var sendBytes = Encoding.UTF8.GetBytes(sendData);
-            var basicProperties = channel.CreateBasicProperties();
             basicProperties.Headers = new Dictionary<string, object>();
-            var metadata = _metadataResolver.GetMetadata(eventData);
+            var metadataItems = _metadataResolver.GetMetadata(data);
+            if (metadataItems != null)
+            {
+                foreach (var kv in metadataItems)
+                {
+                    basicProperties.Headers.TryAdd(kv.Key, kv.Value);
+                }
+            }
             if (metadata != null)
             {
                 foreach (var kv in metadata)
@@ -54,35 +52,39 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                     basicProperties.Headers.TryAdd(kv.Key, kv.Value);
                 }
             }
-            channel.BasicPublish(_exchangeName, routingKey, false, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
-            await Task.CompletedTask;
         }
-        public async Task PublishAsync(object eventData, CancellationToken cancellationToken = default)
+        public async Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
         {
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (eventData == null)
                 throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
-            // 生成路由键
+            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
+            var sendData = JsonConvert.SerializeObject(eventData);
+            var sendBytes = Encoding.UTF8.GetBytes(sendData);
+            var basicProperties = channel.CreateBasicProperties();
+            AddHeaders(basicProperties, eventData, metadata);
+            channel.BasicPublish(_exchangeName, routingKey, false, basicProperties, sendBytes);
+            _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
+            await Task.CompletedTask;
+        }
+        public async Task PublishAsync(object eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+        {
+            using var channel = _rabbitMQProvider.CreateModel();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (eventData == null)
+                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
             var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
             var sendData = JsonConvert.SerializeObject(eventData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             basicProperties.Headers = new Dictionary<string, object>();
-            var metadata = _metadataResolver.GetMetadata(eventData);
-            if (metadata != null)
-            {
-                foreach (var kv in metadata)
-                {
-                    basicProperties.Headers.TryAdd(kv.Key, kv.Value);
-                }
-            }
+            AddHeaders(basicProperties, eventData, metadata);
             channel.BasicPublish(_exchangeName, routingKey, false, basicProperties, sendBytes);
             _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
             await Task.CompletedTask;
         }
-        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> eventData, CancellationToken cancellationToken = default) where TRpcResponse : class
+        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
@@ -96,17 +98,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             basicProperties.ReplyTo = Guid.NewGuid().ToString();
             basicProperties.CorrelationId = Guid.NewGuid().ToString();
             basicProperties.Headers = new Dictionary<string, object>();
-            var metadata = _metadataResolver.GetMetadata(eventData);
-            if (metadata != null)
-            {
-                foreach (var kv in metadata)
-                {
-                    basicProperties.Headers.TryAdd(kv.Key, kv.Value);
-                }
-            }
+            AddHeaders(basicProperties, eventData, metadata);
 
             channel.QueueBind(replyQueueName, _exchangeName, $"{_routingKeyPrefix}{basicProperties.ReplyTo}");
-            // 接收回复消息
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (_, ea) =>
             {
@@ -120,7 +114,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             channel.BasicConsume(queue: replyQueueName, autoAck: true, consumer: consumer);
 
 
-            // 发送消息
             var sendData = JsonConvert.SerializeObject(eventData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
