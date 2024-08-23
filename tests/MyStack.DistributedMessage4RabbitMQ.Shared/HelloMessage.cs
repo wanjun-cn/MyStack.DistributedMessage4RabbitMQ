@@ -2,7 +2,7 @@
 
 namespace MyStack.DistributedMessage4RabbitMQ.Shared
 {
-    [EventName("HelloMessage")]
+    [MessageName("HelloMessage")]
     public class HelloMessage : IDistributedEvent
     {
         public string Message { get; set; } = default!;

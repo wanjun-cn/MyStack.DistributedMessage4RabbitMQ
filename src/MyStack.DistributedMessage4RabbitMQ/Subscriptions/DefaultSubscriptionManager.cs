@@ -12,9 +12,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
             return _subscriptions.Values.SelectMany(x => x).ToList();
         }
 
-        public IList<SubscriptionInfo>? GetSubscriptions(Type eventType)
+        public IList<SubscriptionInfo>? GetSubscriptions(Type messageType)
         {
-            if (_subscriptions.TryGetValue(eventType, out var subscriptions))
+            if (_subscriptions.TryGetValue(messageType, out var subscriptions))
                 return subscriptions;
             return null;
         }
@@ -24,12 +24,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
                 return;
             foreach (var subscription in subscriptions)
             {
-                var eventType = subscription.EventType;
-                if (!_subscriptions.ContainsKey(subscription.EventType))
+                var messageType = subscription.MessageType;
+                if (!_subscriptions.ContainsKey(subscription.MessageType))
                 {
-                    _subscriptions[eventType] = new List<SubscriptionInfo>();
+                    _subscriptions[messageType] = new List<SubscriptionInfo>();
                 }
-                _subscriptions[eventType].Add(subscription);
+                _subscriptions[messageType].Add(subscription);
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IDistributedMessageBus, RabbitMQDistributedMessageBus>();
             services.AddTransient<IRoutingKeyResolver, DefaultRoutingKeyResolver>();
             services.AddTransient<IMetadataResolver, DefaultMetadataResolver>();
-            services.AddHostedService<RabbitMQListenerWorker>();
+            services.AddHostedService<RabbitMQListener>();
 
 
             List<SubscriptionInfo> subscriptions = new List<SubscriptionInfo>();
@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
                         .Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>));
                     foreach (var handlerInterface in handlerInterfaces)
                     {
-                        if (handlerInterface.GetGenericArguments()[0].IsGenericType && handlerInterface.GetGenericArguments()[0].GetGenericTypeDefinition() == typeof(WrappedEvent<>))
+                        if (handlerInterface.GetGenericArguments()[0].IsGenericType && handlerInterface.GetGenericArguments()[0].GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))
                         {
                             services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
                             subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0].GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));

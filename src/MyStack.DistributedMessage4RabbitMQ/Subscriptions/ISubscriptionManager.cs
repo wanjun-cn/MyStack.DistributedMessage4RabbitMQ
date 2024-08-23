@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
 {
     internal interface ISubscriptionManager
     {
-        IList<SubscriptionInfo>? GetSubscriptions(Type eventType);
+        IList<SubscriptionInfo>? GetSubscriptions(Type messageType);
         IList<SubscriptionInfo>? GetAllSubscriptions();
     }
 }

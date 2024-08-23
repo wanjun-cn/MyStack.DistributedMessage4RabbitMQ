@@ -13,14 +13,14 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             var options = serviceProvider.GetRequiredService<IOptions<RabbitMQOptions>>();
             _keyPrefix = options.Value.RoutingKeyPrefix;
         }
-        public virtual string GetRoutingKey(Type eventType)
+        public virtual string GetRoutingKey(Type messageType)
         {
-            var eventNameAttribute = eventType.GetCustomAttribute<EventNameAttribute>();
+            var eventNameAttribute = messageType.GetCustomAttribute<MessageNameAttribute>();
             if (eventNameAttribute != null)
             {
                 return $"{_keyPrefix}{eventNameAttribute.Name}";
             }
-            return $"{_keyPrefix}{eventType.FullName}";
+            return $"{_keyPrefix}{messageType.FullName}";
         }
     }
 }
