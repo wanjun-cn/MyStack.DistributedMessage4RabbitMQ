@@ -28,7 +28,7 @@ Assembly.GetExecutingAssembly());
 ## 1、事件订阅
 ### 定义事件
 ```
-[EventName("HelloMessage")]
+[MessageName("HelloMessage")]
 public class HelloMessage : IDistributedEvent
 {
     public string Message { get; set; }
@@ -65,12 +65,12 @@ public class WrappedData
 
 ### 订阅事件
 ```
-public class WrappedDataEventHandler : IDistributedEventHandler<WrappedEvent<WrappedData>>
+public class DistributedEventWrapperHandler : IDistributedEventHandler<DistributedEventWrapper<WrappedData>>
 {
-    public async Task HandleAsync(WrappedEvent<WrappedData> eventData, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(DistributedEventWrapper<WrappedData> eventData, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("WrappedData");
         await Task.CompletedTask;
+        Console.WriteLine("DistributedEventWrapper");
     }
 }
 ```

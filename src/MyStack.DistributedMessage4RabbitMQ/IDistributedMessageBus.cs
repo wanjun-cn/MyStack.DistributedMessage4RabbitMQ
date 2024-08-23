@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// <returns></returns>
         Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default);
         /// <summary>
-        /// 发送一个事件体
+        /// 发布一个事件对象
         /// </summary>
         /// <param name="eventData">事件数据</param>
         /// <param name="metadata">事件元数据</param>

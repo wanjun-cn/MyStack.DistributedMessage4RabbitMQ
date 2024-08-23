@@ -84,21 +84,21 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
             await Task.CompletedTask;
         }
-        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
+        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
-            if (eventData == null)
-                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
-            BlockingCollection<string> replyMessages = new BlockingCollection<string>();
+            if (requestData == null)
+                throw new ArgumentNullException(nameof(requestData), "事件数据不能为空");
+            BlockingCollection<string> responseMessages = new BlockingCollection<string>();
             var replyQueueName = channel.QueueDeclare().QueueName;
-            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
+            var routingKey = _routingKeyResolver.GetRoutingKey(requestData.GetType());
             var basicProperties = channel.CreateBasicProperties();
 
             basicProperties.ReplyTo = Guid.NewGuid().ToString();
             basicProperties.CorrelationId = Guid.NewGuid().ToString();
             basicProperties.Headers = new Dictionary<string, object>();
-            AddHeaders(basicProperties, eventData, metadata);
+            AddHeaders(basicProperties, requestData, metadata);
 
             channel.QueueBind(replyQueueName, _exchangeName, $"{_routingKeyPrefix}{basicProperties.ReplyTo}");
             var consumer = new EventingBasicConsumer(channel);
@@ -107,14 +107,14 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 var replyMessage = Encoding.UTF8.GetString(ea.Body.Span);
                 if (ea.BasicProperties.CorrelationId == basicProperties.CorrelationId)
                 {
-                    replyMessages.Add(replyMessage);
+                    responseMessages.Add(replyMessage);
                 }
                 _logger?.LogInformation($"[{routingKey}]收到回复: {replyMessage}。");
             };
             channel.BasicConsume(queue: replyQueueName, autoAck: true, consumer: consumer);
 
 
-            var sendData = JsonConvert.SerializeObject(eventData);
+            var sendData = JsonConvert.SerializeObject(requestData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
                 exchange: _exchangeName,
@@ -134,8 +134,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 millisecondsTimeout = Options.RPCTimeout;
             }
 
-            if (replyMessages.TryTake(out var replyMessage, millisecondsTimeout, cancellationToken))
-                return JsonConvert.DeserializeObject<TRpcResponse>(replyMessage);
+            if (responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
+                return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
             return await Task.FromResult<TRpcResponse?>(default);
         }
     }

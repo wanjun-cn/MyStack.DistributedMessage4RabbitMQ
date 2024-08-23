@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
-    internal class RabbitMQListenerWorker : BackgroundService
+    internal class RabbitMQListener : BackgroundService
     {
         private IModel? _channel;
         private readonly IServiceProvider _serviceProvider;
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly ISubscriptionManager _subscriptionManager;
         private readonly ILogger? _logger;
         private static Dictionary<string, Type> _cache = new Dictionary<string, Type>();
-        public RabbitMQListenerWorker(IServiceProvider serviceProvider)
+        public RabbitMQListener(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _rabbitMQProvider = _serviceProvider.GetRequiredService<IRabbitMQChannelProvider>();
@@ -59,9 +59,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
             foreach (var subscription in allSubscriptions)
             {
-                var routingKey = _routingKeyResolver.GetRoutingKey(subscription.EventType);
+                var routingKey = _routingKeyResolver.GetRoutingKey(subscription.MessageType);
                 _channel.QueueBind(Options.QueueOptions.Name, Options.ExchangeOptions.Name, routingKey);
-                _cache.Add(routingKey, subscription.EventType);
+                _cache.Add(routingKey, subscription.MessageType);
                 _logger?.LogInformation($"绑定路由键`{routingKey}`到队列`{Options.QueueOptions.Name}` ");
             }
 
@@ -77,24 +77,24 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 {
                     foreach (var subscription in subscriptions)
                     {
-                        var eventData = JsonConvert.DeserializeObject(receivedMessage, subscription.EventType);
+                        var eventData = JsonConvert.DeserializeObject(receivedMessage, subscription.MessageType);
                         if (eventData == null)
                             continue;
-                        if (subscription.ReplyType == null)
+                        if (subscription.ResponseType == null)
                         {
-                            if (typeof(IDistributedEvent).IsAssignableFrom(subscription.EventType))
+                            if (typeof(IDistributedEvent).IsAssignableFrom(subscription.MessageType))
                             {
-                                var eventHandlerType = subscription.EventHandlerType.MakeGenericType(subscription.EventType);
+                                var eventHandlerType = subscription.HandlerType.MakeGenericType(subscription.MessageType);
                                 var eventHandler = _serviceProvider.GetRequiredService(eventHandlerType);
                                 await ((dynamic)eventHandler).HandleAsync((dynamic)eventData, cancellationToken);
                             }
                             else
                             {
-                                var wrappedEvent = typeof(WrappedEvent<>).MakeGenericType(subscription.EventType);
-                                var eventHandlerType = subscription.EventHandlerType.MakeGenericType(wrappedEvent);
+                                var eventWrapperType = typeof(DistributedEventWrapper<>).MakeGenericType(subscription.MessageType);
+                                var eventHandlerType = subscription.HandlerType.MakeGenericType(eventWrapperType);
                                 var eventHandler = _serviceProvider.GetRequiredService(eventHandlerType);
-                                var wrappedEventData = Activator.CreateInstance(wrappedEvent, eventData);
-                                await ((dynamic)eventHandler).HandleAsync((dynamic)wrappedEventData, cancellationToken);
+                                var eventWrapper = Activator.CreateInstance(eventWrapperType, eventData);
+                                await ((dynamic)eventHandler).HandleAsync((dynamic)eventWrapper, cancellationToken);
                             }
                             _channel.BasicAck(e.DeliveryTag, false);
                         }
@@ -103,7 +103,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                             string replyMessage = "";
                             try
                             {
-                                var eventHandlerType = subscription.EventHandlerType.MakeGenericType(subscription.EventType, subscription.ReplyType);
+                                var eventHandlerType = subscription.HandlerType.MakeGenericType(subscription.MessageType, subscription.ResponseType);
                                 var eventHandler = _serviceProvider.GetRequiredService(eventHandlerType);
                                 var replyMessageObj = await ((dynamic)eventHandler).HandleAsync((dynamic)eventData, cancellationToken);
                                 replyMessage = JsonConvert.SerializeObject(replyMessageObj);

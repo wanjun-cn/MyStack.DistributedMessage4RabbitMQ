@@ -4,20 +4,20 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
 {
     internal class SubscriptionInfo
     {
-        public SubscriptionInfo(Type eventType, Type eventHandlerType)
+        public SubscriptionInfo(Type messageType, Type handlerType)
         {
-            EventType = eventType;
-            EventHandlerType = eventHandlerType;
+            MessageType = messageType;
+            HandlerType = handlerType;
         }
-        public SubscriptionInfo(Type eventType, Type eventHandlerType, Type replyType)
+        public SubscriptionInfo(Type messageType, Type handlerType, Type responseType)
         {
-            EventType = eventType;
-            EventHandlerType = eventHandlerType;
-            ReplyType = replyType;
+            MessageType = messageType;
+            HandlerType = handlerType;
+            ResponseType = responseType;
         }
 
-        public Type EventType { get; }
-        public Type EventHandlerType { get; }
-        public Type? ReplyType { get; }
+        public Type MessageType { get; }
+        public Type HandlerType { get; }
+        public Type? ResponseType { get; }
     }
 }

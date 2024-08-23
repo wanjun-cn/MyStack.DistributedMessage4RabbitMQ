@@ -6,11 +6,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     public class DefaultMetadataResolver : IMetadataResolver
     {
-        public Dictionary<string, object> GetMetadata(object eventData)
+        public Dictionary<string, object> GetMetadata(object messageData)
         {
-            if (eventData == null)
-                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
-            var metadataAttributes = eventData.GetType().GetCustomAttributes<EventMetadataAttribute>();
+            if (messageData == null)
+                throw new ArgumentNullException(nameof(messageData), "事件数据不能为空");
+            var metadataAttributes = messageData.GetType().GetCustomAttributes<MessageMetadataAttribute>();
             var metadata = new Dictionary<string, object>();
             if (metadataAttributes != null)
             {
