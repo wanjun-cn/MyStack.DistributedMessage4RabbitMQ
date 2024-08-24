@@ -62,7 +62,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 var receivedMessage = Encoding.UTF8.GetString(e.Body.Span);
                 _logger?.LogDebug($"收到消息: {receivedMessage}。");
-                var subscriptions = allSubscriptions[e.RoutingKey];
+                if (allSubscriptions.TryGetValue(e.RoutingKey, out var subscriptions))
+                    return;
                 if (subscriptions != null)
                 {
                     foreach (var subscription in subscriptions)

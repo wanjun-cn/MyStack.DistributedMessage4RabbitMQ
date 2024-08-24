@@ -7,6 +7,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
     internal class DefaultSubscriptionManager : ISubscriptionManager, ISubscriptionRegistrar
     {
         private static Dictionary<string, List<SubscriptionInfo>> _subscriptions = new Dictionary<string, List<SubscriptionInfo>>();
+        private readonly IRoutingKeyResolver _routingKeyResolver;
+        public DefaultSubscriptionManager(IRoutingKeyResolver routingKeyResolver)
+        {
+            _routingKeyResolver = routingKeyResolver;
+        }
         public Dictionary<string, List<SubscriptionInfo>>? GetAllSubscriptions()
         {
             return _subscriptions;
@@ -31,7 +36,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
             {
                 string messageKey;
                 if (subscription.MessageType != null)
-                    messageKey = subscription.MessageType.FullName;
+                    messageKey = _routingKeyResolver.GetRoutingKey(subscription.MessageType);
                 else if (!string.IsNullOrEmpty(subscription.MessageKey))
                     messageKey = subscription.MessageKey;
                 else
