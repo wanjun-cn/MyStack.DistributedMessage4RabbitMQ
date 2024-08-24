@@ -6,6 +6,13 @@
 | ----------- | ----------- | 
 | [![nuget](https://img.shields.io/nuget/v/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/packages/MyStack.DistributedMessage4RabbitMQ)    | [![stats](https://img.shields.io/nuget/dt/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/stats/packages/MyStack.DistributedMessage4RabbitMQ?groupby=Version)         |
 
+# 安装MyStack.DistributedMessage4RabbitMQ
+
+可以通过NuGet安装:
+```
+Install-Package MyStack.DistributedMessage4RabbitMQ
+```
+
 # 开始使用
 
 ## 添加服务支持
@@ -79,8 +86,35 @@ public class DistributedEventWrapperHandler : IDistributedEventHandler<Distribut
 await messageBus.PublishAsync(new WrappedData());
 ```
 
+## 3、自定义键值订阅
+### 定义事件数据
+``` 
+public class SubscribeData
+{
+}
 
-## 3、RPC请求
+```
+
+### 订阅事件
+```
+[Subscribe("ABC")]
+public class SubscribeDataHandler : IDistributedEventHandler
+{
+    public async Task HandleAsync(object eventData, CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("SubscribeData");
+        await Task.CompletedTask;
+    }
+}
+```
+### 发布事件
+```
+await messageBus.PublishAsync("ABC",new SubscribeData());
+```
+
+
+
+## 4、RPC请求
 ### 定义请求
 ```
 public class Ping : IRpcRequest<Pong>

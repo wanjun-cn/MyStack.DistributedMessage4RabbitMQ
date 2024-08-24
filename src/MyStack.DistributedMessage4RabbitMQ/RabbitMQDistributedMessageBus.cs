@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
@@ -53,36 +54,30 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 }
             }
         }
-        public async Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+
+        public async Task PublishAsync(string key, object eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
         {
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (eventData == null)
                 throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
-            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
             var sendData = JsonConvert.SerializeObject(eventData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             AddHeaders(basicProperties, eventData, metadata);
-            channel.BasicPublish(_exchangeName, routingKey, false, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
+            channel.BasicPublish(_exchangeName, key, false, basicProperties, sendBytes);
+            _logger?.LogInformation($"[{key}]发布消息: {sendData}。");
             await Task.CompletedTask;
+        }
+        public async Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+        {
+            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
+            await PublishAsync(routingKey, eventData, metadata, cancellationToken);
         }
         public async Task PublishAsync(object eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
         {
-            using var channel = _rabbitMQProvider.CreateModel();
-            cancellationToken.ThrowIfCancellationRequested();
-            if (eventData == null)
-                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
             var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
-            var sendData = JsonConvert.SerializeObject(eventData);
-            var sendBytes = Encoding.UTF8.GetBytes(sendData);
-            var basicProperties = channel.CreateBasicProperties();
-            basicProperties.Headers = new Dictionary<string, object>();
-            AddHeaders(basicProperties, eventData, metadata);
-            channel.BasicPublish(_exchangeName, routingKey, false, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
-            await Task.CompletedTask;
+            await PublishAsync(routingKey, eventData, metadata, cancellationToken);
         }
         public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {

@@ -41,12 +41,13 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
 
             var app = builder.Build();
 
-            var eventBus = app.Services.GetRequiredService<IDistributedMessageBus>();
-            eventBus.PublishAsync(new HelloMessage()
+            var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
+            messageBus.PublishAsync(new HelloMessage()
             {
                 Message = "Hello World"
             });
-            eventBus.PublishAsync(new WrappedData());
+            messageBus.PublishAsync(new WrappedData());
+            messageBus.PublishAsync("ABC",new SubscribeData());
             // Publish a message and wait for a reply
             while (true)
             {
@@ -57,7 +58,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                 {
                     SendBy = "A"
                 };
-                var pongMessage = eventBus.SendAsync(ping).GetAwaiter().GetResult();
+                var pongMessage = messageBus.SendAsync(ping).GetAwaiter().GetResult();
                 Console.WriteLine(pongMessage?.ReplyBy);
             }
         }
