@@ -47,6 +47,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                 Message = "Hello World"
             });
             eventBus.PublishAsync(new WrappedData());
+            eventBus.PublishAsync("ABC",new SubscribeData());
             // Publish a message and wait for a reply
             while (true)
             {

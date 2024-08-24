@@ -29,24 +29,36 @@ namespace Microsoft.Extensions.DependencyInjection
 
 
             List<SubscriptionInfo> subscriptions = new List<SubscriptionInfo>();
-            var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>))));
+            var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => (y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>)) || y == typeof(IDistributedEventHandler))));
             if (eventHandlerTypes.Any())
             {
                 foreach (var eventHandlerType in eventHandlerTypes)
                 {
                     var handlerInterfaces = eventHandlerType.GetInterfaces()
-                        .Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>));
+                        .Where(x => (x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>)) || x == typeof(IDistributedEventHandler));
                     foreach (var handlerInterface in handlerInterfaces)
                     {
-                        if (handlerInterface.GetGenericArguments()[0].IsGenericType && handlerInterface.GetGenericArguments()[0].GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))
+                        if (handlerInterface.IsGenericType)
                         {
-                            services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
-                            subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0].GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                            if (handlerInterface.GetGenericArguments()[0].IsGenericType && handlerInterface.GetGenericArguments()[0].GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))
+                            {
+                                services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
+                                subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0].GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                            }
+                            else
+                            {
+                                services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
+                                subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                            }
                         }
                         else
                         {
-                            services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
-                            subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                            var scubscribeAttribute = eventHandlerType.GetCustomAttribute<SubscribeAttribute>();
+                            if (scubscribeAttribute != null)
+                            {
+                                services.AddTransient(typeof(IDistributedEventHandler), eventHandlerType);
+                                subscriptions.Add(new SubscriptionInfo(scubscribeAttribute.Key, typeof(IDistributedEventHandler)));
+                            }
                         }
                     }
                 }

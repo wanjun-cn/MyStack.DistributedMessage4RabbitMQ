@@ -13,5 +13,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     {
         Task HandleAsync(TEvent eventData, CancellationToken cancellationToken = default);
     }
-
+    /// <summary>
+    /// 表示一个分布式事件订阅接口
+    /// </summary>
+    public interface IDistributedEventHandler
+    {
+        Task HandleAsync(object eventData, CancellationToken cancellationToken = default);
+    }
 }
