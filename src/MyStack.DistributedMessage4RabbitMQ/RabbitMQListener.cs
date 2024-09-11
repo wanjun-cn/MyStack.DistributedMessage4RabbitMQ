@@ -62,7 +62,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 var receivedMessage = Encoding.UTF8.GetString(e.Body.Span);
                 _logger?.LogDebug($"收到消息: {receivedMessage}。");
-                if (allSubscriptions.TryGetValue(e.RoutingKey, out var subscriptions))
+                if (!allSubscriptions.TryGetValue(e.RoutingKey, out var subscriptions))
                     return;
                 if (subscriptions != null)
                 {
@@ -119,7 +119,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                                 replyProperties.CorrelationId = properties.CorrelationId;
                                 _logger?.LogDebug($"回复消息: {replyMessage}。");
                                 var replyBytes = Encoding.UTF8.GetBytes(replyMessage);
-                                _channel.BasicPublish(exchange: Options.ExchangeOptions.Name, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);
+                                _channel.BasicPublish(exchange: Options.ExchangeOptions.Name, routingKey: $"{Options.RoutingKeyPrefix}{properties.ReplyTo}" , mandatory: false, basicProperties: replyProperties, body: replyBytes);
                                 _channel.BasicAck(e.DeliveryTag, false);
                             }
                         }
