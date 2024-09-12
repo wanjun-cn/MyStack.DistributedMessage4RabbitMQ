@@ -3,7 +3,7 @@
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示自定义消息名称的特性
+    /// 表示自定义消息名称的特性，用于设置消息的名称
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class MessageNameAttribute : Attribute

@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// 实现默认的元数据解析器
+    /// </summary>
     public class DefaultMetadataResolver : IMetadataResolver
     {
         public Dictionary<string, object> GetMetadata(object messageData)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
 {
@@ -20,7 +19,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
             MessageType = messageType;
             InterfaceHandlerType = interfaceHandlerType;
             ResponseType = responseType;
-        } 
+        }
         public string? MessageKey { get; }
         public Type? MessageType { get; }
         public Type InterfaceHandlerType { get; }

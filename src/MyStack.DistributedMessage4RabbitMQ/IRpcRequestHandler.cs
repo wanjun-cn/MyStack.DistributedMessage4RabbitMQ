@@ -13,6 +13,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         where TRpcRequest : class, IRpcRequest<TRpcResponse>
         where TRpcResponse : class
     {
-        Task<TRpcResponse> HandleAsync(TRpcRequest eventData, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 处理RPC请求事件
+        /// </summary>
+        /// <param name="requestData">请求对象</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns>返回处理后的结果</returns>
+        Task<TRpcResponse> HandleAsync(TRpcRequest requestData, CancellationToken cancellationToken = default);
     }
 }
