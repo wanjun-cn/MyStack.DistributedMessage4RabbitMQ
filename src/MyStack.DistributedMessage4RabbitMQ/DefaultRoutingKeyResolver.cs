@@ -22,5 +22,10 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             }
             return $"{_keyPrefix}{messageType.FullName}";
         }
+
+        public string GetRoutingKey(string customKey)
+        {
+            return $"{_keyPrefix}{customKey}";
+        }
     }
 }

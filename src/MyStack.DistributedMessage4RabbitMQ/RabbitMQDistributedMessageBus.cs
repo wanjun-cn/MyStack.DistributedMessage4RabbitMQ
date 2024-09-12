@@ -9,15 +9,16 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// 实现RabbitMQ分布式消息总线
+    /// </summary>
     public class RabbitMQDistributedMessageBus : IDistributedMessageBus
     {
-        private string? _routingKeyPrefix;
-
+        private readonly string? _routingKeyPrefix;
         private readonly string _exchangeName;
         private readonly IRoutingKeyResolver _routingKeyResolver;
         private readonly IRabbitMQChannelProvider _rabbitMQProvider;
@@ -86,16 +87,16 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             if (requestData == null)
                 throw new ArgumentNullException(nameof(requestData), "事件数据不能为空");
             BlockingCollection<string> responseMessages = new BlockingCollection<string>();
-            var replyQueueName = channel.QueueDeclare().QueueName;
             var routingKey = _routingKeyResolver.GetRoutingKey(requestData.GetType());
-            var basicProperties = channel.CreateBasicProperties();
 
-            basicProperties.ReplyTo = Guid.NewGuid().ToString();
+            // 设置回复的消息队列和路由键
+            var replyQueueName = channel.QueueDeclare().QueueName;
+            var basicProperties = channel.CreateBasicProperties();
+            basicProperties.ReplyTo = _routingKeyResolver.GetRoutingKey(Guid.NewGuid().ToString());
             basicProperties.CorrelationId = Guid.NewGuid().ToString();
             basicProperties.Headers = new Dictionary<string, object>();
             AddHeaders(basicProperties, requestData, metadata);
-
-            channel.QueueBind(replyQueueName, _exchangeName, $"{_routingKeyPrefix}{basicProperties.ReplyTo}");
+            channel.QueueBind(replyQueueName, _exchangeName, basicProperties.ReplyTo);
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (_, ea) =>
             {
@@ -108,7 +109,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             };
             channel.BasicConsume(queue: replyQueueName, autoAck: true, consumer: consumer);
 
-
+            // 发布消息到队列
             var sendData = JsonConvert.SerializeObject(requestData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
@@ -128,7 +129,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 millisecondsTimeout = Options.RPCTimeout;
             }
-
+            // 获取RPC响应的消息
             if (responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
                 return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
             return await Task.FromResult<TRpcResponse?>(default);

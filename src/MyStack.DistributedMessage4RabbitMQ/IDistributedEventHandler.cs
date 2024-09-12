@@ -11,6 +11,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     public interface IDistributedEventHandler<TEvent>
         where TEvent : class, IDistributedEvent
     {
+        /// <summary>
+        /// 处理事件
+        /// </summary>
+        /// <param name="eventData">事件对象</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns></returns>
         Task HandleAsync(TEvent eventData, CancellationToken cancellationToken = default);
     }
     /// <summary>
@@ -18,6 +24,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     /// </summary>
     public interface IDistributedEventHandler
     {
+        /// <summary>
+        /// 处理事件
+        /// </summary>
+        /// <param name="eventData">事件对象</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns></returns>
         Task HandleAsync(object eventData, CancellationToken cancellationToken = default);
     }
 }

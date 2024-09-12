@@ -22,6 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
             configure.Invoke(options);
             services.Configure(configure);
             services.AddTransient<IRabbitMQChannelProvider, DefaultRabbitMQChannelProvider>();
+            services.AddTransient<IRpcMessageSender, RabbitMQDistributedMessageBus>();
+            services.AddTransient<IDistributedEventPublisher, RabbitMQDistributedMessageBus>();
             services.AddTransient<IDistributedMessageBus, RabbitMQDistributedMessageBus>();
             services.AddTransient<IRoutingKeyResolver, DefaultRoutingKeyResolver>();
             services.AddTransient<IMetadataResolver, DefaultMetadataResolver>();
@@ -29,13 +31,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
 
             List<SubscriptionInfo> subscriptions = new List<SubscriptionInfo>();
-            var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => (y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>)) || y == typeof(IDistributedEventHandler))));
+            var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>) || y == typeof(IDistributedEventHandler))));
             if (eventHandlerTypes.Any())
             {
                 foreach (var eventHandlerType in eventHandlerTypes)
                 {
                     var handlerInterfaces = eventHandlerType.GetInterfaces()
-                        .Where(x => (x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>)) || x == typeof(IDistributedEventHandler));
+                        .Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>) || x == typeof(IDistributedEventHandler));
                     foreach (var handlerInterface in handlerInterfaces)
                     {
                         if (handlerInterface.IsGenericType)

@@ -3,61 +3,70 @@
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a RabbitMQ configuration
+    /// 表示一个RabbitMQ配置项
     /// </summary>
     public class RabbitMQOptions
     {
         /// <summary>
-        /// Get or set UserName
+        /// 获取或设置用户名
         /// </summary>
         public string UserName { get; set; } = "guest";
         /// <summary>
-        /// Get or set Password
+        /// 获取或设置密码
         /// </summary>
         public string Password { get; set; } = "guest";
         /// <summary>
-        /// Get or set Host name
+        /// 获取或设置主机名称
         /// </summary>
         public string HostName { get; set; } = "localhost";
         /// <summary>
-        /// Get or set Port
+        /// 获取或设置端口
         /// </summary>
         public int Port { get; set; } = 3306;
         /// <summary>
-        /// Get or set Virtual host
+        /// 获取或设置虚拟主机名称
         /// </summary>
         public string VirtualHost { get; set; } = "/";
         /// <summary>
-        /// Get or set Prefix for routing keys
+        /// 获取或设置路由键前缀名称
         /// </summary>
         public string? RoutingKeyPrefix { get; set; }
         /// <summary>
-        /// Get or set the waiting time for RPC (millisecond)
+        /// 获取或设置RPC超时时间（毫秒）
         /// </summary>
         public int RPCTimeout { get; set; } = 10000;
+        /// <summary>
+        /// 获取交换机配置项
+        /// </summary>
         public RabbitMQExchangeOptions ExchangeOptions { get; set; } = new RabbitMQExchangeOptions();
+        /// <summary>
+        /// 获取队列配置项
+        /// </summary>
         public RabbitMQQueueOptions QueueOptions { get; set; } = new RabbitMQQueueOptions();
     }
     /// <summary>
-    /// Represents a RabbitMQ exchange configuration
+    /// 表示交换机配置项
     /// </summary>
     public class RabbitMQExchangeOptions
     {
         /// <summary>
-        /// Get or set Exchange type
+        /// 获取或设置交换机类型
         /// </summary>
         public string ExchangeType { get; set; } = default!;
         /// <summary>
-        /// Get or set Exchange name
+        /// 获取或设置交换机名称
         /// </summary>
         public string Name { get; set; } = default!;
         /// <summary>
-        /// Get or set Exchange can be durable or transient
+        /// 获取或设置是否持久化交换机
         /// </summary>
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
         public Dictionary<string, object>? Arguments { get; set; }
     }
+    /// <summary>
+    /// 表示队列配置项
+    /// </summary>
     public class RabbitMQQueueOptions
     {
         public string Name { get; set; } = default!;
