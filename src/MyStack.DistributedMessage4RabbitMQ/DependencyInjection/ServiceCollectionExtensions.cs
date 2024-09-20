@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHostedService<RabbitMQListener>();
 
 
-            List<SubscriptionInfo> subscriptions = new List<SubscriptionInfo>();
+            List<SubscribeInfo> subscribers = new List<SubscribeInfo>();
             var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>) || y == typeof(IDistributedEventHandler))));
             if (eventHandlerTypes.Any())
             {
@@ -45,12 +45,12 @@ namespace Microsoft.Extensions.DependencyInjection
                             if (handlerInterface.GetGenericArguments()[0].IsGenericType && handlerInterface.GetGenericArguments()[0].GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))
                             {
                                 services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
-                                subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0].GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                                subscribers.Add(new SubscribeInfo(handlerInterface.GetGenericArguments()[0].GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
                             }
                             else
                             {
                                 services.AddTransient(typeof(IDistributedEventHandler<>).MakeGenericType(handlerInterface.GetGenericArguments()), eventHandlerType);
-                                subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
+                                subscribers.Add(new SubscribeInfo(handlerInterface.GetGenericArguments()[0], typeof(IDistributedEventHandler<>)));
                             }
                         }
                         else
@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
                             if (scubscribeAttribute != null)
                             {
                                 services.AddTransient(typeof(IDistributedEventHandler), eventHandlerType);
-                                subscriptions.Add(new SubscriptionInfo(scubscribeAttribute.Key, typeof(IDistributedEventHandler)));
+                                subscribers.Add(new SubscribeInfo(scubscribeAttribute.Key, typeof(IDistributedEventHandler)));
                             }
                         }
                     }
@@ -75,16 +75,16 @@ namespace Microsoft.Extensions.DependencyInjection
                     foreach (var handlerInterface in handlerInterfaces)
                     {
                         services.AddTransient(typeof(IRpcRequestHandler<,>).MakeGenericType(handlerInterface.GetGenericArguments()), requestHandlerType);
-                        subscriptions.Add(new SubscriptionInfo(handlerInterface.GetGenericArguments()[0], typeof(IRpcRequestHandler<,>), handlerInterface.GetGenericArguments()[1]));
+                        subscribers.Add(new SubscribeInfo(handlerInterface.GetGenericArguments()[0], typeof(IRpcRequestHandler<,>), handlerInterface.GetGenericArguments()[1]));
                     }
                 }
             }
-            services.AddSingleton<ISubscriptionRegistrar, DefaultSubscriptionManager>();
-            services.AddSingleton<ISubscriptionManager>(factory =>
+            services.AddSingleton<ISubscribeRegistrar, SubscribeManager>();
+            services.AddSingleton<ISubscribeManager>(factory =>
             {
-                var subscriptionRegistrar = factory.GetRequiredService<ISubscriptionRegistrar>();
-                subscriptionRegistrar.Register(subscriptions);
-                return (DefaultSubscriptionManager)subscriptionRegistrar;
+                var subscribeRegistrar = factory.GetRequiredService<ISubscribeRegistrar>();
+                subscribeRegistrar.Register(subscribers);
+                return (SubscribeManager)subscribeRegistrar;
             });
 
 
