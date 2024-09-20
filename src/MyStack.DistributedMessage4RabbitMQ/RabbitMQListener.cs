@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,14 +20,14 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly IServiceProvider _serviceProvider;
         private readonly IRabbitMQChannelProvider _rabbitMQProvider;
         private readonly IRoutingKeyResolver _routingKeyResolver;
-        private readonly ISubscriptionManager _subscriptionManager;
+        private readonly ISubscribeManager _subscribeManager;
         private readonly ILogger? _logger;
         public RabbitMQListener(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _rabbitMQProvider = _serviceProvider.GetRequiredService<IRabbitMQChannelProvider>();
             _routingKeyResolver = _serviceProvider.GetRequiredService<IRoutingKeyResolver>();
-            _subscriptionManager = _serviceProvider.GetRequiredService<ISubscriptionManager>();
+            _subscribeManager = _serviceProvider.GetRequiredService<ISubscribeManager>();
             Options = _serviceProvider.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             _logger = loggerFactory?.CreateLogger(GetType().Name);
@@ -38,7 +39,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var allSubscriptions = _subscriptionManager.GetAllSubscriptions();
+            var allSubscriptions = _subscribeManager.GetAllSubscribers();
             if (allSubscriptions == null)
                 return;
 
@@ -51,9 +52,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             foreach (var subscription in allSubscriptions)
             {
                 _channel.QueueBind(Options.QueueOptions.Name, Options.ExchangeOptions.Name, subscription.Key);
-                _logger?.LogInformation($"绑定路由键`{subscription.Key}`到队列`{Options.QueueOptions.Name}` ");
+                _logger?.LogInformation($"绑定路由键`{subscription.Key}`到队列`{Options.QueueOptions.Name}` "); 
             }
-
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
             _channel.BasicConsume(queue: Options.QueueOptions.Name, autoAck: false, consumer);
@@ -61,7 +61,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 var receivedMessage = Encoding.UTF8.GetString(e.Body.Span);
                 _logger?.LogInformation($"收到消息: {receivedMessage}。");
-                if (!allSubscriptions.TryGetValue(e.RoutingKey, out var subscriptions))
+                var subscriptions = _subscribeManager.GetSubscribers(e.RoutingKey);
+                if (!subscriptions.Any())
                     return;
                 if (subscriptions != null)
                 {
@@ -90,8 +91,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             };
             await Task.CompletedTask;
         }
+         
 
-        private async Task RpcMessageHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscriptionInfo subscription, object eventData, CancellationToken cancellationToken)
+        private async Task RpcMessageHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscribeInfo subscription, object eventData, CancellationToken cancellationToken)
         {
             string replyMessage = "";
             try
@@ -113,7 +115,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             }
         }
 
-        private async Task DistributedEventHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscriptionInfo subscription, object eventData, CancellationToken cancellationToken)
+        private async Task DistributedEventHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscribeInfo subscription, object eventData, CancellationToken cancellationToken)
         {
             if (typeof(IDistributedEvent).IsAssignableFrom(subscription.MessageType))
             {

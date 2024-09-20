@@ -1,20 +1,20 @@
 ﻿using System;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
 {
-    internal class SubscriptionInfo
+    internal class SubscribeInfo
     {
-        public SubscriptionInfo(Type messageType, Type interfaceHandlerType)
+        public SubscribeInfo(Type messageType, Type interfaceHandlerType)
         {
             MessageType = messageType;
             InterfaceHandlerType = interfaceHandlerType;
         }
-        public SubscriptionInfo(string messageKey, Type interfaceHandlerType)
+        public SubscribeInfo(string messageKey, Type interfaceHandlerType)
         {
             MessageKey = messageKey;
             InterfaceHandlerType = interfaceHandlerType;
         }
-        public SubscriptionInfo(Type messageType, Type interfaceHandlerType, Type responseType)
+        public SubscribeInfo(Type messageType, Type interfaceHandlerType, Type responseType)
         {
             MessageType = messageType;
             InterfaceHandlerType = interfaceHandlerType;

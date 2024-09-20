@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
 {
-    internal class DefaultSubscriptionManager : ISubscriptionManager, ISubscriptionRegistrar
+    internal class SubscribeManager : ISubscribeManager, ISubscribeRegistrar
     {
-        private static Dictionary<string, List<SubscriptionInfo>> _subscriptions = new Dictionary<string, List<SubscriptionInfo>>();
+        private static Dictionary<string, List<SubscribeInfo>> _subscriptions = new Dictionary<string, List<SubscribeInfo>>();
         private readonly IRoutingKeyResolver _routingKeyResolver;
-        public DefaultSubscriptionManager(IRoutingKeyResolver routingKeyResolver)
+        public SubscribeManager(IRoutingKeyResolver routingKeyResolver)
         {
             _routingKeyResolver = routingKeyResolver;
         }
-        public Dictionary<string, List<SubscriptionInfo>>? GetAllSubscriptions()
+        public Dictionary<string, List<SubscribeInfo>>? GetAllSubscribers()
         {
             return _subscriptions;
         }
-        public IList<SubscriptionInfo>? GetSubscriptions(string messageKey)
+        public IList<SubscribeInfo>? GetSubscribers(string messageKey)
         {
-            if (_subscriptions.TryGetValue(messageKey, out var subscriptions))
-                return subscriptions;
-            return null;
+            var subscriptions = new List<SubscribeInfo>();
+            foreach (var item in _subscriptions)
+            {
+                if (messageKey.Contains(item.Key.Replace("*.", "")))
+                    subscriptions.AddRange(item.Value);
+            }
+            return subscriptions;
         }
-        public IList<SubscriptionInfo>? GetSubscriptions(Type messageType)
+        public IList<SubscribeInfo>? GetSubscribers(Type messageType)
         {
             if (_subscriptions.TryGetValue(messageType.FullName, out var subscriptions))
                 return subscriptions;
             return null;
         }
-        public void Register(List<SubscriptionInfo> subscriptions)
+        public void Register(List<SubscribeInfo> subscriptions)
         {
             if (subscriptions == null)
                 return;
@@ -44,7 +48,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscriptions
                 var messageType = subscription.MessageType;
                 if (!_subscriptions.ContainsKey(messageKey))
                 {
-                    _subscriptions[messageKey] = new List<SubscriptionInfo>();
+                    _subscriptions[messageKey] = new List<SubscribeInfo>();
                 }
                 _subscriptions[messageKey].Add(subscription);
             }
