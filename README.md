@@ -35,12 +35,18 @@ Assembly.GetExecutingAssembly());
 ## 1、事件订阅
 ### 定义事件
 ```
-[MessageName("HelloMessage")]
 public class HelloMessage : IDistributedEvent
 {
     public string Message { get; set; }
 }
 
+or
+
+[MessageName("HelloMessage")]
+public class HelloMessage : IDistributedEvent
+{
+    public string Message { get; set; }
+}
 ```
 
 ### 订阅事件
