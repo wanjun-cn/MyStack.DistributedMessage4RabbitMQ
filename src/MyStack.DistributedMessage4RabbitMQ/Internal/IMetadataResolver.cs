@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
     /// 表示元数据解析器
     /// </summary>
-    public interface IMetadataResolver
+    internal interface IMetadataResolver
     {
         /// <summary>
         /// 获取事件对象的元数据字典

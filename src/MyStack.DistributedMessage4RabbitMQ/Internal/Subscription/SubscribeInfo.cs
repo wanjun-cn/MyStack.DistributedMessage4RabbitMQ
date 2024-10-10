@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
 {
     internal class SubscribeInfo
     {

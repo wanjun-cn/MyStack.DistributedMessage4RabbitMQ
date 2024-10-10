@@ -34,7 +34,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                        configure.QueueOptions.Name = "MyStack";
                        configure.ExchangeOptions.Name = "MyStack";
                        configure.ExchangeOptions.ExchangeType = "topic";
-                       configure.RPCTimeout = 2000;
+                       configure.RPCTimeout = 2000000;
                    },
                    Assembly.GetExecutingAssembly());
                });

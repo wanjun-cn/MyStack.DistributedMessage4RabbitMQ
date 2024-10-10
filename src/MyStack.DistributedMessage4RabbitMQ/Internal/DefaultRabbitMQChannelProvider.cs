@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
     /// 实现默认RabbitMQ通道提供器
     /// </summary>
-    public class DefaultRabbitMQChannelProvider : IRabbitMQChannelProvider
+    internal class DefaultRabbitMQChannelProvider : IRabbitMQChannelProvider
     {
         private readonly IConnection _connection;
         public DefaultRabbitMQChannelProvider(IOptions<RabbitMQOptions> options)

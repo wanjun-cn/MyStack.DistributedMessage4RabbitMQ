@@ -14,25 +14,25 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// </summary>
         /// <param name="key">事件的键名</param>
         /// <param name="eventData">事件数据</param>
-        /// <param name="metadata">事件元数据</param>
+        /// <param name="headers">消息头数据</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task PublishAsync(string key, object eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default);
+        Task PublishAsync(string key, object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
         /// <summary>
         /// 发布一个事件
         /// </summary>
         /// <param name="eventData">事件数据</param>
-        /// <param name="metadata">事件元数据</param>
+        /// <param name="headers">消息头数据</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default);
+        Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
         /// <summary>
         /// 发布一个事件对象
         /// </summary>
         /// <param name="eventData">事件数据</param>
-        /// <param name="metadata">事件元数据</param>
+        /// <param name="headers">消息头数据</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        Task PublishAsync(object eventData, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default);
+        Task PublishAsync(object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
     }
 }

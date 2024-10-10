@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IDistributedMessageBus, RabbitMQDistributedMessageBus>();
             services.AddTransient<IRoutingKeyResolver, DefaultRoutingKeyResolver>();
             services.AddTransient<IMetadataResolver, DefaultMetadataResolver>();
-            services.AddHostedService<RabbitMQListener>();
+            services.AddHostedService<RabbitMQMessageListener>();
 
 
             List<SubscribeInfo> subscribers = new List<SubscribeInfo>();

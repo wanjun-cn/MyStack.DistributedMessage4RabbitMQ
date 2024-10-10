@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
     /// 实现默认的元数据解析器
     /// </summary>
-    public class DefaultMetadataResolver : IMetadataResolver
+    internal class DefaultMetadataResolver : IMetadataResolver
     {
         public Dictionary<string, object> GetMetadata(object messageData)
         {

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
     /// 表示路由键解析器
     /// </summary>
-    public interface IRoutingKeyResolver
+    internal interface IRoutingKeyResolver
     {
         /// <summary>
         /// 获取消息类型的路由键

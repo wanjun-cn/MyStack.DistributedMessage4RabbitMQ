@@ -3,9 +3,9 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Reflection;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
-    public class DefaultRoutingKeyResolver : IRoutingKeyResolver
+    internal class DefaultRoutingKeyResolver : IRoutingKeyResolver
     {
         private string? _keyPrefix;
         public DefaultRoutingKeyResolver(IServiceProvider serviceProvider)

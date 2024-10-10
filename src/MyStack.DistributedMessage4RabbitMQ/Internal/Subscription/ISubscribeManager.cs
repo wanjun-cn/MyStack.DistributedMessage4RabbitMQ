@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
 {
     internal interface ISubscribeManager
     {

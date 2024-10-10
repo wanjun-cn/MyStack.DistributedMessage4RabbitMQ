@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
 {
     internal class SubscribeManager : ISubscribeManager, ISubscribeRegistrar
     {
@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
         }
         public IList<SubscribeInfo>? GetSubscribers(string messageKey)
         {
+            // TODO:需优化查找消息方式
             var subscriptions = new List<SubscribeInfo>();
             foreach (var item in _subscriptions)
             {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,9 +12,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
-    internal class RabbitMQListener : BackgroundService
+    internal class RabbitMQMessageListener : BackgroundService
     {
         private IModel? _channel;
         private readonly IServiceProvider _serviceProvider;
@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly IRoutingKeyResolver _routingKeyResolver;
         private readonly ISubscribeManager _subscribeManager;
         private readonly ILogger? _logger;
-        public RabbitMQListener(IServiceProvider serviceProvider)
+        public RabbitMQMessageListener(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _rabbitMQProvider = _serviceProvider.GetRequiredService<IRabbitMQChannelProvider>();
@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             foreach (var subscription in allSubscriptions)
             {
                 _channel.QueueBind(Options.QueueOptions.Name, Options.ExchangeOptions.Name, subscription.Key);
-                _logger?.LogInformation($"绑定路由键`{subscription.Key}`到队列`{Options.QueueOptions.Name}` "); 
+                _logger?.LogInformation($"绑定路由键`{subscription.Key}`到队列`{Options.QueueOptions.Name}` ");
             }
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
@@ -91,7 +91,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             };
             await Task.CompletedTask;
         }
-         
+
 
         private async Task RpcMessageHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscribeInfo subscription, object eventData, CancellationToken cancellationToken)
         {
