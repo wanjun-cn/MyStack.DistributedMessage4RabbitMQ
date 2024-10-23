@@ -1,22 +1,21 @@
 # MyStack.DistributedMessage4RabbitMQ
 
-开源的轻量级消息总线类库（RabbitMQ），支持发布/订阅、RPC
+An open-source lightweight message bus library (RabbitMQ) that supports publish/subscribe and RPC.
 
 | nuget      | stats |
 | ----------- | ----------- | 
 | [![nuget](https://img.shields.io/nuget/v/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/packages/MyStack.DistributedMessage4RabbitMQ)    | [![stats](https://img.shields.io/nuget/dt/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/stats/packages/MyStack.DistributedMessage4RabbitMQ?groupby=Version)         |
 
-# 安装MyStack.DistributedMessage4RabbitMQ
+# Install MyStack.DistributedMessage4RabbitMQ
 
-可以通过NuGet安装:
-```
+You can install via NuGet:
+```csharp
 Install-Package MyStack.DistributedMessage4RabbitMQ
-```
 
-# 开始使用
+# Getting Started
 
-## 添加服务支持
-``` 
+## Add Service Support
+```csharp 
 services.AddDistributedMessage4RabbitMQ(configure =>
 {
     configure.HostName = "localhost";
@@ -32,8 +31,8 @@ services.AddDistributedMessage4RabbitMQ(configure =>
 Assembly.GetExecutingAssembly());
 ```
 
-## 1、事件订阅
-### 定义事件
+## Event Subscription
+### Define Event
 ```
 public class HelloMessage : IDistributedEvent
 {
@@ -49,7 +48,7 @@ public class HelloMessage : IDistributedEvent
 }
 ```
 
-### 订阅事件
+### Subscribe to Event  
 ```
   public class HelloMessageHandler : IDistributedEventHandler<HelloMessage>
     {
@@ -60,14 +59,14 @@ public class HelloMessage : IDistributedEvent
         }
     }
 ```
-### 发布事件
+### Publish Event
 ```
 await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
 ```
 
 
-## 2、事件体订阅
-### 定义事件数据
+## Event Wrapper Subscription
+### Define Wrapped Data
 ``` 
 public class WrappedData 
 {
@@ -76,7 +75,7 @@ public class WrappedData
 
 ```
 
-### 订阅事件
+### Subscribe to Event
 ```
 public class DistributedEventWrapperHandler : IDistributedEventHandler<DistributedEventWrapper<WrappedData>>
 {
@@ -87,13 +86,13 @@ public class DistributedEventWrapperHandler : IDistributedEventHandler<Distribut
     }
 }
 ```
-### 发布事件
+### Publish Event
 ```
 await messageBus.PublishAsync(new WrappedData());
 ```
 
-## 3、自定义键值订阅
-### 定义事件数据
+## Custom Key-Value Subscription
+### Define Event Data
 ``` 
 public class SubscribeData
 {
@@ -101,7 +100,7 @@ public class SubscribeData
 
 ```
 
-### 订阅事件
+### Subscribe to Event
 ```
 [Subscribe("ABC")]
 public class SubscribeDataHandler : IDistributedEventHandler
@@ -113,22 +112,21 @@ public class SubscribeDataHandler : IDistributedEventHandler
     }
 }
 ```
-### 发布事件
+### Publish Event
 ```
 await messageBus.PublishAsync("ABC",new SubscribeData());
 ```
 
 
-
-## 4、RPC请求
-### 定义请求
+## 4、RPC Request
+### Define Request
 ```
 public class Ping : IRpcRequest<Pong>
 {
     public string SendBy { get; set; }
 }
 ```
-### 定义响应
+### Define Response
 ```
  public class Pong
  {
@@ -136,7 +134,7 @@ public class Ping : IRpcRequest<Pong>
  }
 ```
 
-### 订阅消息
+### Subscribe to Request
 ```
   public class PingHandler : IRpcRequestHandler<Ping, Pong>
   {
@@ -148,11 +146,11 @@ public class Ping : IRpcRequest<Pong>
       }
   }
 ```
-### 发布消息
+### Send Request
 ```
 var pongMessage = messageBus.SendAsync(ping);
 ```
 
-# 许可证
+# License
 
 MIT
