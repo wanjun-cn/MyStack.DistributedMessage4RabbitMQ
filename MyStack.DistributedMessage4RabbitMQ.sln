@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ", "src\MyStack.DistributedMessage4RabbitMQ\MyStack.DistributedMessage4RabbitMQ.csproj", "{1AC71E7B-6E60-4218-853C-E1604DF9206C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStack.DistributedMessage4RabbitMQ", "src\MyStack.DistributedMessage4RabbitMQ\MyStack.DistributedMessage4RabbitMQ.csproj", "{1AC71E7B-6E60-4218-853C-E1604DF9206C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0B2D1FBC-7127-45D7-A666-8B07FE7B6D7D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9909F4F4-309E-446F-9797-D13FC7A199EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ.Shared", "tests\MyStack.DistributedMessage4RabbitMQ.Shared\MyStack.DistributedMessage4RabbitMQ.Shared.csproj", "{0E2F2BDD-74D6-4A9B-973C-D2E00D6A2EDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStack.DistributedMessage4RabbitMQ.Shared", "tests\MyStack.DistributedMessage4RabbitMQ.Shared\MyStack.DistributedMessage4RabbitMQ.Shared.csproj", "{0E2F2BDD-74D6-4A9B-973C-D2E00D6A2EDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ.Consumer", "tests\MyStack.DistributedMessage4RabbitMQ.Consumer\MyStack.DistributedMessage4RabbitMQ.Consumer.csproj", "{12FC93D6-4B29-4BB2-9C37-1ECE25A2E609}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStack.DistributedMessage4RabbitMQ.Consumer", "tests\MyStack.DistributedMessage4RabbitMQ.Consumer\MyStack.DistributedMessage4RabbitMQ.Consumer.csproj", "{12FC93D6-4B29-4BB2-9C37-1ECE25A2E609}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ.Producer", "tests\MyStack.DistributedMessage4RabbitMQ.Producer\MyStack.DistributedMessage4RabbitMQ.Producer.csproj", "{4C72DA57-921E-4A2E-A666-C57AACBC3816}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStack.DistributedMessage4RabbitMQ.Producer", "tests\MyStack.DistributedMessage4RabbitMQ.Producer\MyStack.DistributedMessage4RabbitMQ.Producer.csproj", "{4C72DA57-921E-4A2E-A666-C57AACBC3816}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ.Test", "tests\MyStack.DistributedMessage4RabbitMQ.Test\MyStack.DistributedMessage4RabbitMQ.Test.csproj", "{648522F5-675F-4BF4-A859-459CCE1692F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{4C72DA57-921E-4A2E-A666-C57AACBC3816}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C72DA57-921E-4A2E-A666-C57AACBC3816}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C72DA57-921E-4A2E-A666-C57AACBC3816}.Release|Any CPU.Build.0 = Release|Any CPU
+		{648522F5-675F-4BF4-A859-459CCE1692F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{648522F5-675F-4BF4-A859-459CCE1692F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{648522F5-675F-4BF4-A859-459CCE1692F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{648522F5-675F-4BF4-A859-459CCE1692F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{0E2F2BDD-74D6-4A9B-973C-D2E00D6A2EDA} = {9909F4F4-309E-446F-9797-D13FC7A199EF}
 		{12FC93D6-4B29-4BB2-9C37-1ECE25A2E609} = {9909F4F4-309E-446F-9797-D13FC7A199EF}
 		{4C72DA57-921E-4A2E-A666-C57AACBC3816} = {9909F4F4-309E-446F-9797-D13FC7A199EF}
+		{648522F5-675F-4BF4-A859-459CCE1692F8} = {9909F4F4-309E-446F-9797-D13FC7A199EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0B573910-0881-4F4C-90C2-A7166FA8F529}

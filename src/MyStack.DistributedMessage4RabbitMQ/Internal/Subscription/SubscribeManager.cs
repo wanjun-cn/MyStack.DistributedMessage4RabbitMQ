@@ -17,14 +17,21 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
         }
         public IList<SubscribeInfo>? GetSubscribers(string messageKey)
         {
-            // TODO:需优化查找消息方式
             var subscriptions = new List<SubscribeInfo>();
             foreach (var item in _subscriptions)
             {
-                if (messageKey.Contains(item.Key.Replace("*.", "")))
+                if (IsMatch(messageKey, item.Key))
                     subscriptions.AddRange(item.Value);
             }
             return subscriptions;
+        }
+        public bool IsMatch(string pattern, string input)
+        {
+            // 将RabbitMQ的通配符转换为正则表达式
+            pattern = pattern.Replace(".", @"\.")// 将模式中的.转换为正则表达式中的\.，以匹配实际的点字符
+                .Replace("*", "[^.]")// 将模式中*转换为正则表达式中的[^.]，表示匹配任意一个非点字符
+                .Replace("#", ".*");//将模式中的#转换为正则表达式中的.*，表示匹配任意数量的任意字符
+            return System.Text.RegularExpressions.Regex.IsMatch(input, $"^{pattern}$");
         }
         public IList<SubscribeInfo>? GetSubscribers(Type messageType)
         {
