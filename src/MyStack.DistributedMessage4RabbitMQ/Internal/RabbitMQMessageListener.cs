@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
         private readonly IRoutingKeyResolver _routingKeyResolver;
         private readonly ISubscribeManager _subscribeManager;
         private readonly ILogger? _logger;
+
         public RabbitMQMessageListener(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -31,8 +32,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
             Options = _serviceProvider.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             _logger = loggerFactory?.CreateLogger(GetType().Name);
-
         }
+
         public RabbitMQOptions Options { get; private set; }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -44,15 +45,15 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
                 return;
 
             _channel = _rabbitMQProvider.CreateModel();
-            // 定义交换机
+            // Define exchange
             _channel.ExchangeDeclare(Options.ExchangeOptions.Name, Options.ExchangeOptions.ExchangeType, Options.ExchangeOptions.Durable, Options.ExchangeOptions.AutoDelete, Options.ExchangeOptions.Arguments);
-            // 定义队列
+            // Define queue
             _channel.QueueDeclare(Options.QueueOptions.Name, Options.QueueOptions.Durable, Options.QueueOptions.Exclusive, Options.QueueOptions.AutoDelete, Options.QueueOptions.Arguments);
-            // 绑定订阅路由键
+            // Bind subscription routing keys
             foreach (var subscription in allSubscriptions)
             {
                 _channel.QueueBind(Options.QueueOptions.Name, Options.ExchangeOptions.Name, subscription.Key);
-                _logger?.LogInformation($"绑定路由键`{subscription.Key}`到队列`{Options.QueueOptions.Name}` ");
+                _logger?.LogInformation($"Binding routing key `{subscription.Key}` to queue `{Options.QueueOptions.Name}`");
             }
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
@@ -60,7 +61,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
             consumer.Received += async (_, e) =>
             {
                 var receivedMessage = Encoding.UTF8.GetString(e.Body.Span);
-                _logger?.LogInformation($"收到消息: {receivedMessage}。");
+                _logger?.LogInformation($"Received message: {receivedMessage}.");
                 var subscriptions = _subscribeManager.GetSubscribers(e.RoutingKey);
                 if (!subscriptions.Any())
                     return;
@@ -92,7 +93,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
             await Task.CompletedTask;
         }
 
-
         private async Task RpcMessageHandleAsync(IModel channel, BasicDeliverEventArgs e, SubscribeInfo subscription, object eventData, CancellationToken cancellationToken)
         {
             string replyMessage = "";
@@ -108,7 +108,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
                 var properties = e.BasicProperties;
                 var replyProperties = channel.CreateBasicProperties();
                 replyProperties.CorrelationId = properties.CorrelationId;
-                _logger?.LogInformation($"回复消息: {replyMessage}。");
+                _logger?.LogInformation($"Reply message: {replyMessage}.");
                 var replyBytes = Encoding.UTF8.GetBytes(replyMessage);
                 channel.BasicPublish(exchange: Options.ExchangeOptions.Name, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);
                 channel.BasicAck(e.DeliveryTag, false);

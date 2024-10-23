@@ -5,12 +5,12 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>MyStack.DistributedMessage4RabbitMQ</Title>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <Authors>Jun Wan</Authors>
     <Company>Jun Wan</Company>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>NUGET.md</PackageReadmeFile>
-    <Description>开源的轻量级分布式消息总线类库（RabbitMQ）</Description>
+    <Description>An open-source lightweight distributed messaging bus library (RabbitMQ)</Description>
     <Title>Microsoft.Extensions.DistributedMessage4RabbitMQ</Title>
     <RootNamespace>Microsoft.Extensions.DistributedMessage4RabbitMQ</RootNamespace>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

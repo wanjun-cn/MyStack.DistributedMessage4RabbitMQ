@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 实现RabbitMQ分布式消息总线
+    /// Implementation of the RabbitMQ distributed message bus
     /// </summary>
     public class RabbitMQDistributedMessageBus : IDistributedMessageBus
     {
@@ -63,15 +63,15 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (eventData == null)
-                throw new ArgumentNullException(nameof(eventData), "事件数据不能为空");
+                throw new ArgumentNullException(nameof(eventData), "Event data cannot be null");
             var sendData = JsonConvert.SerializeObject(eventData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             AddHeaders(basicProperties, eventData, headers);
       
-           // 发布消息
+            // Publish message
             channel.BasicPublish(_exchangeName, key, false, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{key}]发布消息: {sendData}。");
+            _logger?.LogInformation($"[{key}] Published message: {sendData}.");
             await Task.CompletedTask;
         }
         public async Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default)
@@ -89,11 +89,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             using var channel = _rabbitMQProvider.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (requestData == null)
-                throw new ArgumentNullException(nameof(requestData), "事件数据不能为空");
+                throw new ArgumentNullException(nameof(requestData), "Event data cannot be null");
             BlockingCollection<string> responseMessages = new BlockingCollection<string>();
             var routingKey = _routingKeyResolver.GetRoutingKey(requestData.GetType());
 
-            // 设置回复的消息队列和路由键
+            // Set the reply queue and routing key
             var replyQueueName = channel.QueueDeclare().QueueName;
             var basicProperties = channel.CreateBasicProperties();
             basicProperties.ReplyTo = _routingKeyResolver.GetRoutingKey(Guid.NewGuid().ToString());
@@ -110,11 +110,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 {
                     responseMessages.Add(replyMessage);
                 }
-                _logger?.LogInformation($"[{routingKey}]收到回复: {replyMessage}。");
+                _logger?.LogInformation($"[{routingKey}] Received reply: {replyMessage}.");
             };
             channel.BasicConsume(queue: replyQueueName, autoAck: true, consumer: consumer);
 
-            // 发布消息到队列
+            // Publish message to the queue
             var sendData = JsonConvert.SerializeObject(requestData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData); 
             channel.BasicPublish(
@@ -122,9 +122,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 routingKey: routingKey,
                 basicProperties: basicProperties,
                 body: sendBytes);
-            _logger?.LogInformation($"[{routingKey}]发布消息: {sendData}。");
+            _logger?.LogInformation($"[{routingKey}] Published message: {sendData}.");
 
-            //  获取RPC请求的超时时间
+            // Get the RPC request timeout
             int millisecondsTimeout = -1;
             if (headers != null && headers.TryGetValue("RPCTimeout", out var timeoutValue))
             {
@@ -134,7 +134,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 millisecondsTimeout = Options.RPCTimeout;
             }
-            // 获取RPC响应的消息
+            // Get the RPC response message
             if (responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
                 return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
             return await Task.FromResult<TRpcResponse?>(default);

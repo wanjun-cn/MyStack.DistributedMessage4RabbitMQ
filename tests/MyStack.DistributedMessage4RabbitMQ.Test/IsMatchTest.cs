@@ -10,7 +10,6 @@ namespace MyStack.DistributedMessage4RabbitMQ.Test
         [Test]
         public void TestIsMatch()
         {
-            // ²âÊÔÓÃÀı
             var testCases = new (string pattern, string input, bool expectedResult)[]
             {
                 ("a.*.c", "a.b.c", true),
@@ -19,7 +18,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Test
                 ("a.#.b", "a.c.d.b", true)
             };
 
-            // Ö´ĞĞ²âÊÔ
+          
             foreach (var (pattern, input, expectedResult) in testCases)
             {
                 var actualResult = IsMatch(pattern, input);

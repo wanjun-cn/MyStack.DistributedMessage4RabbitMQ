@@ -1,10 +1,9 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示一个分布式事件接口
+    /// Represents a distributed event interface
     /// </summary>
     public interface IDistributedEvent
     {
     }
-
 }

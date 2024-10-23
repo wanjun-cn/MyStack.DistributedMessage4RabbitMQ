@@ -7,14 +7,17 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
     {
         private static Dictionary<string, List<SubscribeInfo>> _subscriptions = new Dictionary<string, List<SubscribeInfo>>();
         private readonly IRoutingKeyResolver _routingKeyResolver;
+
         public SubscribeManager(IRoutingKeyResolver routingKeyResolver)
         {
             _routingKeyResolver = routingKeyResolver;
         }
+
         public Dictionary<string, List<SubscribeInfo>>? GetAllSubscribers()
         {
             return _subscriptions;
         }
+
         public IList<SubscribeInfo>? GetSubscribers(string messageKey)
         {
             var subscriptions = new List<SubscribeInfo>();
@@ -25,24 +28,28 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
             }
             return subscriptions;
         }
+
         public bool IsMatch(string pattern, string input)
         {
-            // 将RabbitMQ的通配符转换为正则表达式
-            pattern = pattern.Replace(".", @"\.")// 将模式中的.转换为正则表达式中的\.，以匹配实际的点字符
-                .Replace("*", "[^.]")// 将模式中*转换为正则表达式中的[^.]，表示匹配任意一个非点字符
-                .Replace("#", ".*");//将模式中的#转换为正则表达式中的.*，表示匹配任意数量的任意字符
+            // Convert RabbitMQ wildcards to regular expressions
+            pattern = pattern.Replace(".", @"\.")  // Replace . in the pattern with \. to match actual dot characters
+                .Replace("*", "[^.]*")  // Replace * in the pattern with [^.]* to match any character except a dot
+                .Replace("#", ".*");  // Replace # in the pattern with .* to match any number of any characters
             return System.Text.RegularExpressions.Regex.IsMatch(input, $"^{pattern}$");
         }
+
         public IList<SubscribeInfo>? GetSubscribers(Type messageType)
         {
             if (_subscriptions.TryGetValue(messageType.FullName, out var subscriptions))
                 return subscriptions;
             return null;
         }
+
         public void Register(List<SubscribeInfo> subscriptions)
         {
             if (subscriptions == null)
                 return;
+
             foreach (var subscription in subscriptions)
             {
                 string messageKey;
@@ -51,7 +58,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal.Subscription
                 else if (!string.IsNullOrEmpty(subscription.MessageKey))
                     messageKey = subscription.MessageKey;
                 else
-                    throw new InvalidOperationException("订阅的键不能为空");
+                    throw new InvalidOperationException("Subscription key cannot be empty");
 
                 var messageType = subscription.MessageType;
                 if (!_subscriptions.ContainsKey(messageKey))

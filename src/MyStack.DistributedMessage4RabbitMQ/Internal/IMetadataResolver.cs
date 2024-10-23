@@ -3,14 +3,14 @@
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
-    /// 表示元数据解析器
+    /// Represents a metadata resolver
     /// </summary>
     internal interface IMetadataResolver
     {
         /// <summary>
-        /// 获取事件对象的元数据字典
+        /// Gets the metadata dictionary for the event object
         /// </summary>
-        /// <param name="messageData">事件对象</param>
+        /// <param name="messageData">The event object</param>
         /// <returns></returns>
         Dictionary<string, object> GetMetadata(object messageData);
     }

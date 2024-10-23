@@ -4,12 +4,12 @@ using System;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
-    /// 表示RabbitMQ消息通道提供器
+    /// Represents a RabbitMQ message channel provider
     /// </summary>
     internal interface IRabbitMQChannelProvider : IDisposable
     {
         /// <summary>
-        /// 创建一个通道对象
+        /// Creates a channel object
         /// </summary>
         /// <returns></returns>
         IModel CreateModel();

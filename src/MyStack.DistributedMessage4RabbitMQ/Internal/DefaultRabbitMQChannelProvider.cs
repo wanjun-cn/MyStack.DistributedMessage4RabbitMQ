@@ -4,11 +4,12 @@ using RabbitMQ.Client;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
-    /// 实现默认RabbitMQ通道提供器
+    /// Implements the default RabbitMQ channel provider
     /// </summary>
     internal class DefaultRabbitMQChannelProvider : IRabbitMQChannelProvider
     {
         private readonly IConnection _connection;
+
         public DefaultRabbitMQChannelProvider(IOptions<RabbitMQOptions> options)
         {
             var factory = new ConnectionFactory
@@ -23,10 +24,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
                 factory.VirtualHost = options.Value.VirtualHost;
             _connection = factory.CreateConnection();
         }
+
         public virtual IModel CreateModel()
         {
             return _connection.CreateModel();
         }
+
         public virtual void Dispose()
         {
             _connection?.Close();

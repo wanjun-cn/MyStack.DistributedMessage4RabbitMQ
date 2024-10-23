@@ -1,11 +1,11 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示一个请求接口
+    /// Represents a request interface
     /// </summary>
-    /// <typeparam name="TRpcResponse">表示响应的类型</typeparam>
+    /// <typeparam name="TRpcResponse">The type of the response</typeparam>
     public interface IRpcRequest<TRpcResponse>
-         where TRpcResponse : class
+        where TRpcResponse : class
     {
     }
 }

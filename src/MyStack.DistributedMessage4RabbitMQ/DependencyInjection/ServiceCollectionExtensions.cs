@@ -11,16 +11,16 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// 添加RabbitMQ消息总线
+        /// Add RabbitMQ message bus
         /// </summary>
-        /// <param name="services">服务集合</param>
-        /// <param name="configure">配置委托</param>
-        /// <param name="assemblies">注册事件订阅的程序集</param>
-        /// <returns>返回服务集合</returns>
+        /// <param name="services">Service collection</param>
+        /// <param name="configure">Configuration delegate</param>
+        /// <param name="assemblies">Assemblies to register event subscriptions</param>
+        /// <returns>Returns the service collection</returns>
         public static IServiceCollection AddDistributedMessage4RabbitMQ(this IServiceCollection services, Action<RabbitMQOptions> configure, params Assembly[] assemblies)
         {
             var options = new RabbitMQOptions();
-            configure.Invoke(options);
+            configure?.Invoke(options);
             services.Configure(configure);
             services.AddTransient<IRabbitMQChannelProvider, DefaultRabbitMQChannelProvider>();
             services.AddTransient<IRpcMessageSender, RabbitMQDistributedMessageBus>();
@@ -29,7 +29,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IRoutingKeyResolver, DefaultRoutingKeyResolver>();
             services.AddTransient<IMetadataResolver, DefaultMetadataResolver>();
             services.AddHostedService<RabbitMQMessageListener>();
-
 
             List<SubscribeInfo> subscribers = new List<SubscribeInfo>();
             var eventHandlerTypes = assemblies.SelectMany(x => x.GetTypes().Where(x => !x.IsAbstract && x.IsPublic && x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDistributedEventHandler<>) || y == typeof(IDistributedEventHandler))));
@@ -56,11 +55,11 @@ namespace Microsoft.Extensions.DependencyInjection
                         }
                         else
                         {
-                            var scubscribeAttribute = eventHandlerType.GetCustomAttribute<SubscribeAttribute>();
-                            if (scubscribeAttribute != null)
+                            var subscribeAttribute = eventHandlerType.GetCustomAttribute<SubscribeAttribute>();
+                            if (subscribeAttribute != null)
                             {
                                 services.AddTransient(typeof(IDistributedEventHandler), eventHandlerType);
-                                subscribers.Add(new SubscribeInfo(scubscribeAttribute.Key, typeof(IDistributedEventHandler)));
+                                subscribers.Add(new SubscribeInfo(subscribeAttribute.Key, typeof(IDistributedEventHandler)));
                             }
                         }
                     }
@@ -87,7 +86,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 subscribeRegistrar.Register(subscribers);
                 return (SubscribeManager)subscribeRegistrar;
             });
-
 
             return services;
         }

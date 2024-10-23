@@ -3,22 +3,21 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
-
     /// <summary>
-    /// 表示一个请求处理接口
+    /// Represents a request handling interface
     /// </summary>
-    /// <typeparam name="TRpcRequest">请求的类型</typeparam>
-    /// <typeparam name="TRpcResponse">返回结果的类型</typeparam>
+    /// <typeparam name="TRpcRequest">The type of the request</typeparam>
+    /// <typeparam name="TRpcResponse">The type of the response</typeparam>
     public interface IRpcRequestHandler<TRpcRequest, TRpcResponse>
         where TRpcRequest : class, IRpcRequest<TRpcResponse>
         where TRpcResponse : class
     {
         /// <summary>
-        /// 处理RPC请求事件
+        /// Handles the RPC request event
         /// </summary>
-        /// <param name="requestData">请求对象</param>
-        /// <param name="cancellationToken">取消令牌</param>
-        /// <returns>返回处理后的结果</returns>
+        /// <param name="requestData">The request object</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The result after processing</returns>
         Task<TRpcResponse> HandleAsync(TRpcRequest requestData, CancellationToken cancellationToken = default);
     }
 }

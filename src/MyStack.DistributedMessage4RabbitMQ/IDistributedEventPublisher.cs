@@ -5,33 +5,35 @@ using System.Threading.Tasks;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示分布式事件发布接口
+    /// Represents a distributed event publisher interface
     /// </summary>
     public interface IDistributedEventPublisher
     {
         /// <summary>
-        /// 发布一个事件
+        /// Publishes an event
         /// </summary>
-        /// <param name="key">事件的键名</param>
-        /// <param name="eventData">事件数据</param>
-        /// <param name="headers">消息头数据</param>
-        /// <param name="cancellationToken">取消令牌</param>
+        /// <param name="key">The key name of the event</param>
+        /// <param name="eventData">The event data</param>
+        /// <param name="headers">The message header data</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
         Task PublishAsync(string key, object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
+
         /// <summary>
-        /// 发布一个事件
+        /// Publishes an event
         /// </summary>
-        /// <param name="eventData">事件数据</param>
-        /// <param name="headers">消息头数据</param>
-        /// <param name="cancellationToken">取消令牌</param>
+        /// <param name="eventData">The event data</param>
+        /// <param name="headers">The message header data</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
         Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
+
         /// <summary>
-        /// 发布一个事件对象
+        /// Publishes an event object
         /// </summary>
-        /// <param name="eventData">事件数据</param>
-        /// <param name="headers">消息头数据</param>
-        /// <param name="cancellationToken">取消令牌</param>
+        /// <param name="eventData">The event data</param>
+        /// <param name="headers">The message header data</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
         Task PublishAsync(object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default);
     }

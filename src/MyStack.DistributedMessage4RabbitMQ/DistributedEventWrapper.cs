@@ -1,9 +1,9 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示一个事件体
+    /// Represents an event wrapper
     /// </summary>
-    /// <typeparam name="TEventData">事件数据类型</typeparam>
+    /// <typeparam name="TEventData">The type of event data</typeparam>
     public class DistributedEventWrapper<TEventData> : IDistributedEvent
     {
         public TEventData EventData { get; }
@@ -12,8 +12,9 @@
             EventData = eventData;
         }
     }
+
     /// <summary>
-    /// 表示一个事件体
+    /// Represents an event wrapper
     /// </summary>
     public class DistributedEventWrapper : DistributedEventWrapper<object>
     {

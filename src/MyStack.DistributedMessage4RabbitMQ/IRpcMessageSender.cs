@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示RPC消息发送接口
+    /// Represents an RPC message sender interface
     /// </summary>
     public interface IRpcMessageSender
     {
         /// <summary>
-        /// 发送一个请求
+        /// Sends a request
         /// </summary>
-        /// <typeparam name="TRpcResponse">返回结果的类型</typeparam>
-        /// <param name="requestData">请求数据</param>
-        /// <param name="headers">消息头数据</param>
-        /// <param name="cancellationToken">取消令牌</param>
-        /// <returns>处理成功时返回结果，否则返回null</returns>
+        /// <typeparam name="TRpcResponse">The type of the response</typeparam>
+        /// <param name="requestData">The request data</param>
+        /// <param name="headers">The message header data</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The result if the processing is successful, otherwise null</returns>
         Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default)
             where TRpcResponse : class;
     }

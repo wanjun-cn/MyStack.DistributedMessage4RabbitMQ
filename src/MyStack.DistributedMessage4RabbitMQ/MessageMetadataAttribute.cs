@@ -3,30 +3,30 @@
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// 表示一个消息元数据特性，用于标记消息传递的元数据
+    /// Represents a message metadata attribute, used to mark metadata for message passing
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class MessageMetadataAttribute : Attribute
     {
         /// <summary>
-        /// 获取元数据的名称
+        /// Gets the name of the metadata
         /// </summary>
         public string Name { get; }
         /// <summary>
-        /// 获取元数据的值
+        /// Gets the value of the metadata
         /// </summary>
         public object Value { get; }
         /// <summary>
-        /// 初始化一个消息元数据特性
+        /// Initializes a message metadata attribute
         /// </summary>
-        /// <param name="name">元数据的名称</param>
-        /// <param name="value">元数据的值</param>
+        /// <param name="name">The name of the metadata</param>
+        /// <param name="value">The value of the metadata</param>
         /// <exception cref="ArgumentNullException"></exception>
         public MessageMetadataAttribute(string name, object value)
         {
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name", "元数据的名称不能设置为空。");
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name", "The name of the metadata cannot be set to null or empty.");
             Name = name;
-            Value = value ?? throw new ArgumentNullException("value", "元数据的值不能设置为空。");
+            Value = value ?? throw new ArgumentNullException("value", "The value of the metadata cannot be set to null.");
         }
     }
 }

@@ -3,18 +3,19 @@
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal
 {
     /// <summary>
-    /// 表示路由键解析器
+    /// Represents a routing key resolver
     /// </summary>
     internal interface IRoutingKeyResolver
     {
         /// <summary>
-        /// 获取消息类型的路由键
+        /// Gets the routing key for the message type
         /// </summary>
         /// <param name="messageType"></param>
         /// <returns></returns>
         string GetRoutingKey(Type messageType);
+
         /// <summary>
-        /// 获取自定义键的路由键
+        /// Gets the routing key for the custom key
         /// </summary>
         /// <param name="customKey"></param>
         /// <returns></returns>
