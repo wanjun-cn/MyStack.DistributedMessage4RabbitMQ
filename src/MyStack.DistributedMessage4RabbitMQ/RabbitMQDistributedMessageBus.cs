@@ -68,7 +68,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             AddHeaders(basicProperties, eventData, headers);
-      
+
             // Publish message
             channel.BasicPublish(_exchangeName, key, false, basicProperties, sendBytes);
             _logger?.LogInformation($"[{key}] Published message: {sendData}.");
@@ -96,12 +96,13 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             // Set the reply queue and routing key
             var replyQueueName = channel.QueueDeclare().QueueName;
             var basicProperties = channel.CreateBasicProperties();
-            basicProperties.ReplyTo = _routingKeyResolver.GetRoutingKey(Guid.NewGuid().ToString());
+            basicProperties.ReplyTo = Guid.NewGuid().ToString();
             basicProperties.CorrelationId = Guid.NewGuid().ToString();
             basicProperties.Headers = new Dictionary<string, object>();
             AddHeaders(basicProperties, requestData, headers);
-            
-            channel.QueueBind(replyQueueName, _exchangeName, basicProperties.ReplyTo);
+
+            var replyRoutingKey = _routingKeyResolver.GetRoutingKey(basicProperties.ReplyTo);
+            channel.QueueBind(replyQueueName, _exchangeName, replyRoutingKey);
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (_, ea) =>
             {
@@ -116,7 +117,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
             // Publish message to the queue
             var sendData = JsonConvert.SerializeObject(requestData);
-            var sendBytes = Encoding.UTF8.GetBytes(sendData); 
+            var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
                 exchange: _exchangeName,
                 routingKey: routingKey,
