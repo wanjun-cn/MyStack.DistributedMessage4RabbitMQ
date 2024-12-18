@@ -1,23 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>MyStack.DistributedMessage4RabbitMQ</Title>
-    <Version>1.0.11</Version>
-    <Authors>Jun Wan</Authors>
-    <Company>Jun Wan</Company>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>NUGET.md</PackageReadmeFile>
-    <Description>An open-source lightweight distributed messaging bus library (RabbitMQ)</Description>
-    <Title>Microsoft.Extensions.DistributedMessage4RabbitMQ</Title>
-    <RootNamespace>Microsoft.Extensions.DistributedMessage4RabbitMQ</RootNamespace>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/june-it/MyStack.DistributedMessage4RabbitMQ.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>MyStack.DistributedMessage4RabbitMQ</Title>
+		<Version>1.0.12</Version>
+		<Authors>Jun Wan</Authors>
+		<Company>Jun Wan</Company>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>NUGET.md</PackageReadmeFile>
+		<Description>An open-source lightweight distributed messaging bus library (RabbitMQ)</Description>
+		<Title>Microsoft.Extensions.DistributedMessage4RabbitMQ</Title>
+		<RootNamespace>Microsoft.Extensions.DistributedMessage4RabbitMQ</RootNamespace>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/june-it/MyStack.DistributedMessage4RabbitMQ.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageTags>MyStack;RabbitMQ;DistributedEvent;RPC</PackageTags>
+	</PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1591</NoWarn>
