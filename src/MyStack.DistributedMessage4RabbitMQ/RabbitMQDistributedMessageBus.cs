@@ -136,9 +136,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 millisecondsTimeout = Options.RPCTimeout;
             }
             // Get the RPC response message
-            if (responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
-                return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
-            return await Task.FromResult<TRpcResponse?>(default);
+            if (!responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
+                throw new RpcTimeoutException("Response timeout when sending RPC request", millisecondsTimeout, routingKey);
+            return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
         }
     }
 }
