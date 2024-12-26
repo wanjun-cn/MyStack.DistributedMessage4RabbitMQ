@@ -19,6 +19,7 @@ services.AddDistributedMessage4RabbitMQ(configure =>
     configure.RPCTimeout = 2000;
 },
 Assembly.GetExecutingAssembly());
+```
 
 ## Event Subscription
 ### Define Event
