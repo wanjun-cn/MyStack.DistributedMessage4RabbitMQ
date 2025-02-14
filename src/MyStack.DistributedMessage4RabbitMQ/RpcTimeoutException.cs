@@ -10,6 +10,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             RoutingKey = routingKey;
         }
         public int Timeout { get; private set; }
-        public string RoutingKey { get; private set; } 
+        public string RoutingKey { get; private set; }
     }
 }

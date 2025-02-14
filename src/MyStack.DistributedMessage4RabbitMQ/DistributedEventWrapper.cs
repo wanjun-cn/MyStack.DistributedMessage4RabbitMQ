@@ -4,7 +4,7 @@
     /// Represents an event wrapper
     /// </summary>
     /// <typeparam name="TEventData">The type of event data</typeparam>
-    public class DistributedEventWrapper<TEventData> : IDistributedEvent
+    public class DistributedEventWrapper<TEventData> : DistributedEventBase
     {
         public TEventData EventData { get; }
         public DistributedEventWrapper(TEventData eventData)

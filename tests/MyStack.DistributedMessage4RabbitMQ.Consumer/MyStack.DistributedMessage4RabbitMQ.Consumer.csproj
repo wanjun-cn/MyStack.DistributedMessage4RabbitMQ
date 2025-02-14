@@ -14,9 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MyStack.DistributedMessage4RabbitMQ.Shared\MyStack.DistributedMessage4RabbitMQ.Shared.csproj" />
   </ItemGroup>
-
- 
-
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

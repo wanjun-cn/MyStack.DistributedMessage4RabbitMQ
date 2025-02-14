@@ -6,30 +6,16 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     /// <summary>
     /// Represents a distributed event handler interface
     /// </summary>
-    /// <typeparam name="TEvent">The type of the event</typeparam>
-    public interface IDistributedEventHandler<TEvent>
-        where TEvent : class, IDistributedEvent
+    /// <typeparam name="TDistributedEvent">The type of the distributed event</typeparam>
+    public interface IDistributedEventHandler<TDistributedEvent>
+        where TDistributedEvent : class, IDistributedEvent
     {
         /// <summary>
-        /// Handles the event
+        /// The task of handle a message
         /// </summary>
-        /// <param name="eventData">The event object</param>
+        /// <param name="eventData">The message object</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns></returns>
-        Task HandleAsync(TEvent eventData, CancellationToken cancellationToken = default);
-    }
-
-    /// <summary>
-    /// Represents a distributed event handler interface
-    /// </summary>
-    public interface IDistributedEventHandler
-    {
-        /// <summary>
-        /// Handles the event
-        /// </summary>
-        /// <param name="eventData">The event object</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns></returns>
-        Task HandleAsync(object eventData, CancellationToken cancellationToken = default);
+        Task HandleAsync(TDistributedEvent eventData, CancellationToken cancellationToken = default);
     }
 }

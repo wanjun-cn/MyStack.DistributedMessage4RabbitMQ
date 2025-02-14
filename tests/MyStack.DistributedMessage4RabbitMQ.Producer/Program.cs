@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DistributedMessage4RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyStack.DistributedMessage4RabbitMQ.Shared;
-using System.Reflection;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Producer
 {
@@ -42,12 +42,13 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
             var app = builder.Build();
 
             var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
-            messageBus.PublishAsync(new HelloMessage()
+            var hello = new HelloMessage()
             {
                 Message = "Hello World"
-            });
+            };
+            hello.Metadata.Add("key1", "key1");
+            messageBus.PublishAsync(hello);
             messageBus.PublishAsync(new WrappedData());
-            messageBus.PublishAsync("ABC",new SubscribeData());
             // Publish a message and wait for a reply
             while (true)
             {

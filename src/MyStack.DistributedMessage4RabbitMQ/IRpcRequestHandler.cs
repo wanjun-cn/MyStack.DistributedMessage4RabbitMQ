@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         where TRpcResponse : class
     {
         /// <summary>
-        /// Handles the RPC request event
+        /// The task of handle a RPC message
         /// </summary>
         /// <param name="requestData">The request object</param>
         /// <param name="cancellationToken">The cancellation token</param>
