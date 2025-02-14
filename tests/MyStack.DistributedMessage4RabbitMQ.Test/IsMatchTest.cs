@@ -18,7 +18,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Test
                 ("a.#.b", "a.c.d.b", true)
             };
 
-          
+
             foreach (var (pattern, input, expectedResult) in testCases)
             {
                 var actualResult = IsMatch(pattern, input);

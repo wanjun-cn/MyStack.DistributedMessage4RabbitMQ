@@ -7,5 +7,6 @@
     public interface IRpcRequest<TRpcResponse>
         where TRpcResponse : class
     {
+        MessageMetadata Metadata { get; }
     }
 }

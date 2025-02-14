@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
     /// Represents a RabbitMQ configuration option
@@ -38,64 +36,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// <summary>
         /// Gets the exchange configuration options
         /// </summary>
-        public RabbitMQExchangeOptions ExchangeOptions { get; set; } = new RabbitMQExchangeOptions();
+        public ExchangeDeclareValue ExchangeOptions { get; set; } = new ExchangeDeclareValue();
         /// <summary>
         /// Gets the queue configuration options
         /// </summary>
-        public RabbitMQQueueOptions QueueOptions { get; set; } = new RabbitMQQueueOptions();
+        public QueueDeclareValue QueueOptions { get; set; } = new QueueDeclareValue();
     }
 
-    /// <summary>
-    /// Represents exchange configuration options
-    /// </summary>
-    public class RabbitMQExchangeOptions
-    {
-        /// <summary>
-        /// Gets or sets the exchange type
-        /// </summary>
-        public string ExchangeType { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets the exchange name
-        /// </summary>
-        public string Name { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets whether the exchange is durable
-        /// </summary>
-        public bool Durable { get; set; }
-        /// <summary>
-        /// Gets or sets whether the exchange is auto-deleted
-        /// </summary>
-        public bool AutoDelete { get; set; }
-        /// <summary>
-        /// Gets or sets additional arguments for the exchange
-        /// </summary>
-        public Dictionary<string, object>? Arguments { get; set; }
-    }
-
-    /// <summary>
-    /// Represents queue configuration options
-    /// </summary>
-    public class RabbitMQQueueOptions
-    {
-        /// <summary>
-        /// Gets or sets the queue name
-        /// </summary>
-        public string Name { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets whether the queue is durable
-        /// </summary>
-        public bool Durable { get; set; }
-        /// <summary>
-        /// Gets or sets whether the queue is exclusive
-        /// </summary>
-        public bool Exclusive { get; set; }
-        /// <summary>
-        /// Gets or sets whether the queue is auto-deleted
-        /// </summary>
-        public bool AutoDelete { get; set; }
-        /// <summary>
-        /// Gets or sets additional arguments for the queue
-        /// </summary>
-        public Dictionary<string, object>? Arguments { get; set; }
-    }
 }

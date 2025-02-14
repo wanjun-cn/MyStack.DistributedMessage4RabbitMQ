@@ -31,10 +31,12 @@ public class HelloMessage : IDistributedEvent
 
 or
 
-[MessageName("HelloMessage")]
-public class HelloMessage : IDistributedEvent
+[ExchangeDeclare("Hello")]
+[QueueDeclare("Hello")]
+[QueueBind("HelloMessage")]
+public class HelloMessage : DistributedEventBase
 {
-    public string Message { get; set; }
+    public string Message { get; set; } = default!;
 }
 ```
 
@@ -52,6 +54,15 @@ public class HelloMessage : IDistributedEvent
 ### Publish Event
 ```
 await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
+
+or 
+
+var hello = new HelloMessage()
+{
+    Message = "Hello World"
+};
+hello.Metadata.Add("key1", "value");
+messageBus.PublishAsync(hello);
 ```
 
 
@@ -80,36 +91,10 @@ public class DistributedEventWrapperHandler : IDistributedEventHandler<Distribut
 ```
 await messageBus.PublishAsync(new WrappedData());
 ```
-
-## Custom Key-Value Subscription
-### Define Event Data
-``` 
-public class SubscribeData
-{
-}
-
-```
-
-### Subscribe to Event
-```
-[Subscribe("ABC")]
-public class SubscribeDataHandler : IDistributedEventHandler
-{
-    public async Task HandleAsync(object eventData, CancellationToken cancellationToken = default)
-    {
-        Console.WriteLine("SubscribeData");
-        await Task.CompletedTask;
-    }
-}
-```
-### Publish Event
-```
-await messageBus.PublishAsync("ABC",new SubscribeData());
-```
+ 
 
 
-
-## 4、RPC Request
+## 3、RPC Request
 ### Define Request
 ```
 public class Ping : IRpcRequest<Pong>

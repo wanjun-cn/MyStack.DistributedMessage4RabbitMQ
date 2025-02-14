@@ -1,97 +1,104 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ.Internal;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
-    /// <summary>
-    /// Implementation of the RabbitMQ distributed message bus
-    /// </summary>
     public class RabbitMQDistributedMessageBus : IDistributedMessageBus
     {
-        private readonly string? _routingKeyPrefix;
-        private readonly string _exchangeName;
-        private readonly IRoutingKeyResolver _routingKeyResolver;
-        private readonly IRabbitMQChannelProvider _rabbitMQProvider;
-        private readonly IMetadataResolver _metadataResolver;
-        private readonly ILogger? _logger;
-        public RabbitMQDistributedMessageBus(IServiceProvider serviceProvider)
+        private readonly RabbitMQProvider _rabbitMQProvider;
+        private readonly QueueBindValueProvider _queueBindValueProvider;
+        private readonly RoutingKeyProvider _routingKeyProvider;
+        private readonly ILogger<RabbitMQDistributedMessageBus> _logger;
+        private readonly RabbitMQOptions _options;
+        public RabbitMQDistributedMessageBus(RabbitMQProvider rabbitMQProvider,
+        QueueBindValueProvider queueBindValueProvider,
+        RoutingKeyProvider routingKeyProvider,
+        ILogger<RabbitMQDistributedMessageBus> logger,
+        IOptions<RabbitMQOptions> optionsAccessor)
         {
-            _rabbitMQProvider = serviceProvider.GetRequiredService<IRabbitMQChannelProvider>();
-            _routingKeyResolver = serviceProvider.GetRequiredService<IRoutingKeyResolver>();
-            _metadataResolver = serviceProvider.GetRequiredService<IMetadataResolver>();
-            Options = serviceProvider.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
-            _exchangeName = Options.ExchangeOptions.Name;
-            _routingKeyPrefix = Options.RoutingKeyPrefix;
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            _logger = loggerFactory?.CreateLogger<RabbitMQDistributedMessageBus>();
+            _rabbitMQProvider = rabbitMQProvider;
+            _queueBindValueProvider = queueBindValueProvider;
+            _routingKeyProvider = routingKeyProvider;
+            _logger = logger;
+            _options = optionsAccessor.Value;
         }
-        protected RabbitMQOptions Options { get; private set; }
-        private void AddHeaders(IBasicProperties basicProperties, object data, Dictionary<string, object>? headers = null)
+        private void SetHeaders(object eventData, IBasicProperties basicProperties, MessageMetadata? metadata)
         {
-            basicProperties.Headers = new Dictionary<string, object>();
-            var metadata = _metadataResolver.GetMetadata(data);
-            if (metadata != null)
+            var headersAttributes = eventData.GetType().GetCustomAttributes<HeadersAttribute>();
+            if (headersAttributes != null)
             {
-                foreach (var kv in metadata)
+                basicProperties.Headers ??= new Dictionary<string, object?>();
+                foreach (var headersAttribute in headersAttributes)
                 {
-                    basicProperties.Headers.TryAdd(kv.Key, kv.Value);
+                    basicProperties.Headers.TryAdd(headersAttribute.Key, headersAttribute.Value);
+                }
+
+            }
+
+            if (eventData is IDistributedEvent distributedEvent)
+            {
+                var metadataAttributes = distributedEvent.Metadata.Where(x => x.Key.StartsWith(MyStackConsts.RABBITMQ_HEADER));
+                if (metadataAttributes.Any())
+                {
+                    foreach (var metadataAttribute in metadataAttributes)
+                    {
+                        var headerKey = metadataAttribute.Key.Replace(MyStackConsts.RABBITMQ_HEADER, "");
+                        basicProperties.Headers.TryAdd(headerKey, metadataAttribute.Value);
+                    }
                 }
             }
-            if (headers != null)
+
+            if (metadata != null)
             {
-                foreach (var kv in headers)
+                foreach (var kv in metadata.Where(x => x.Key.StartsWith(MyStackConsts.RABBITMQ_HEADER)))
                 {
-                    basicProperties.Headers.TryAdd(kv.Key, kv.Value);
+                    var headerKey = kv.Key.Replace(MyStackConsts.RABBITMQ_HEADER, "");
+                    basicProperties.Headers.TryAdd(headerKey, kv.Value);
                 }
             }
         }
 
-        public async Task PublishAsync(string key, object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default)
+        public async Task PublishAsync(object eventData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default)
         {
-            using var channel = _rabbitMQProvider.CreateModel();
+            using var connection = await _rabbitMQProvider.GetConnectionAsync(cancellationToken);
+            using var channel = connection.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (eventData == null)
                 throw new ArgumentNullException(nameof(eventData), "Event data cannot be null");
             var sendData = JsonConvert.SerializeObject(eventData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
-            AddHeaders(basicProperties, eventData, headers);
+            SetHeaders(eventData, basicProperties, metadata);
 
             // Publish message
-            channel.BasicPublish(_exchangeName, key, false, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{key}] Published message: {sendData}.");
+            var queueBindValue = _queueBindValueProvider.GetValue(eventData.GetType());
+            channel.BasicPublish(queueBindValue.Exchange, queueBindValue.RoutingKey, true, basicProperties, sendBytes);
+            _logger?.LogInformation($"[{queueBindValue.RoutingKey}] Published message: {sendData}.");
             await Task.CompletedTask;
         }
-        public async Task PublishAsync(IDistributedEvent eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default)
+
+        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {
-            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
-            await PublishAsync(routingKey, eventData, headers, cancellationToken);
-        }
-        public async Task PublishAsync(object eventData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default)
-        {
-            var routingKey = _routingKeyResolver.GetRoutingKey(eventData.GetType());
-            await PublishAsync(routingKey, eventData, headers, cancellationToken);
-        }
-        public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, Dictionary<string, object>? headers = null, CancellationToken cancellationToken = default) where TRpcResponse : class
-        {
-            using var channel = _rabbitMQProvider.CreateModel();
+            using var connection = await _rabbitMQProvider.GetConnectionAsync(cancellationToken);
+            using var channel = connection.CreateModel();
             cancellationToken.ThrowIfCancellationRequested();
             if (requestData == null)
                 throw new ArgumentNullException(nameof(requestData), "Event data cannot be null");
             BlockingCollection<string> responseMessages = new BlockingCollection<string>();
-            var routingKey = _routingKeyResolver.GetRoutingKey(requestData.GetType());
+            var queueBindValue = _queueBindValueProvider.GetValue(requestData.GetType());
+            var exchangeName = queueBindValue.Exchange;
+            var routingKey = queueBindValue.RoutingKey;
 
             // Set the reply queue and routing key
             var replyQueueName = channel.QueueDeclare().QueueName;
@@ -99,10 +106,10 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             basicProperties.ReplyTo = Guid.NewGuid().ToString();
             basicProperties.CorrelationId = Guid.NewGuid().ToString();
             basicProperties.Headers = new Dictionary<string, object>();
-            AddHeaders(basicProperties, requestData, headers);
+            SetHeaders(requestData, basicProperties, metadata);
 
-            var replyRoutingKey = _routingKeyResolver.GetRoutingKey(basicProperties.ReplyTo);
-            channel.QueueBind(replyQueueName, _exchangeName, replyRoutingKey);
+            var replyRoutingKey = _routingKeyProvider.GetValue(basicProperties.ReplyTo);
+            channel.QueueBind(replyQueueName, exchangeName, replyRoutingKey);
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (_, ea) =>
             {
@@ -119,7 +126,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             var sendData = JsonConvert.SerializeObject(requestData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
-                exchange: _exchangeName,
+                exchange: exchangeName,
                 routingKey: routingKey,
                 basicProperties: basicProperties,
                 body: sendBytes);
@@ -127,13 +134,13 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
             // Get the RPC request timeout
             int millisecondsTimeout = -1;
-            if (headers != null && headers.TryGetValue("RPCTimeout", out var timeoutValue))
+            if (metadata != null && metadata.TryGetValue("RPCTimeout", out var timeoutValue))
             {
                 millisecondsTimeout = Convert.ToInt32(timeoutValue);
             }
             else
             {
-                millisecondsTimeout = Options.RPCTimeout;
+                millisecondsTimeout = _options.RPCTimeout;
             }
             // Get the RPC response message
             if (!responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
