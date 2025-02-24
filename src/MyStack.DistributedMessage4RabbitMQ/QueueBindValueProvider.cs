@@ -5,6 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents a service for providing queue binding values.
+    /// </summary>
     public class QueueBindValueProvider
     {
         private readonly ExchangeDeclareValueProvider _exchangeDeclareValueProvider;
@@ -21,6 +24,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             _options = optionsAccessor.Value;
             _routingKeyProvider = routingKeyProvider;
         }
+        /// <summary>
+        /// Retrieves the queue binding value from the message type.
+        /// </summary>
+        /// <param name="messageType">The message type.</param>
+        /// <returns></returns>
         public QueueBindValue GetValue([NotNull] Type messageType)
         {
             if (messageType.IsGenericType && messageType.GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))

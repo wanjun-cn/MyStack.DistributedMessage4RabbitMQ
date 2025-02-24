@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a RabbitMQ configuration option
+    /// Represents the RabbitMQ configuration options.
     /// </summary>
     public class RabbitMQOptions
     {
@@ -20,7 +20,7 @@
         /// <summary>
         /// Gets or sets the port
         /// </summary>
-        public int Port { get; set; } = 5672; // Corrected the default port for RabbitMQ
+        public int Port { get; set; } = 5672;
         /// <summary>
         /// Gets or sets the virtual host name
         /// </summary>

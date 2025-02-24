@@ -14,10 +14,13 @@ using RabbitMQ.Client.Events;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents the RabbitMQ background service for subscribing to message processing logic.
+    /// </summary>
     internal class RabbitMQBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly RabbitMQProvider _rabbitMQProvider;
+        private readonly RabbitMQConnectionProvider _connectionProvider;
         private readonly ExchangeDeclareValueProvider _exchangeDeclareValueProvider;
         private readonly QueueDeclareValueProvider _queueDeclareValueProvider;
         private readonly QueueBindValueProvider _queueBindValueProvider;
@@ -25,7 +28,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly ILogger<RabbitMQBackgroundService> _logger;
         private readonly SubscriptionManager _subscriptionManager;
         public RabbitMQBackgroundService(IServiceProvider serviceProvider,
-                RabbitMQProvider rabbitMQProvider,
+                RabbitMQConnectionProvider connectionProvider,
                 ExchangeDeclareValueProvider exchangeDeclareValueProvider,
                 QueueDeclareValueProvider queueDeclareValueProvider,
                 QueueBindValueProvider queueBindValueProvider,
@@ -35,7 +38,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             )
         {
             _serviceProvider = serviceProvider;
-            _rabbitMQProvider = rabbitMQProvider;
+            _connectionProvider = connectionProvider;
             _exchangeDeclareValueProvider = exchangeDeclareValueProvider;
             _queueDeclareValueProvider = queueDeclareValueProvider;
             _queueBindValueProvider = queueBindValueProvider;
@@ -45,7 +48,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var connection = await _rabbitMQProvider.GetConnectionAsync(cancellationToken);
+            var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
             var channel = connection.CreateModel();
             var queueNames = BindRoutingKeysAndGetQueues(channel);
             await ReceiveMessageAsync(channel, queueNames, cancellationToken);
@@ -61,11 +64,11 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 var queueDeclareValue = _queueDeclareValueProvider.GetValue(messageType, _options.QueueOptions);
                 var queueBindValue = _queueBindValueProvider.GetValue(messageType);
 
-                channel.QueueDeclare(queueBindValue.Queue, queueDeclareValue.Durable, queueDeclareValue.Exclusive, queueDeclareValue.AutoDelete, queueDeclareValue.Arguments);
-                channel.ExchangeDeclare(queueBindValue.Exchange, exchangeDeclareValue.ExchangeType ?? "topic", exchangeDeclareValue.Durable, exchangeDeclareValue.AutoDelete, exchangeDeclareValue.Arguments);
-                channel.QueueBind(queueBindValue.Queue, queueBindValue.Exchange, queueBindValue.RoutingKey, null);
-                _logger?.LogInformation($"Binding routing key `{queueBindValue.RoutingKey}` to queue `{queueBindValue.Queue}`");
-                queueNames.Add(queueBindValue.Queue);
+                channel.QueueDeclare(queueBindValue.QueueName, queueDeclareValue.Durable, queueDeclareValue.Exclusive, queueDeclareValue.AutoDelete, queueDeclareValue.Arguments);
+                channel.ExchangeDeclare(queueBindValue.ExchangeName, exchangeDeclareValue.ExchangeType ?? "topic", exchangeDeclareValue.Durable, exchangeDeclareValue.AutoDelete, exchangeDeclareValue.Arguments);
+                channel.QueueBind(queueBindValue.QueueName, queueBindValue.ExchangeName, queueBindValue.RoutingKey, null);
+                _logger?.LogInformation($"Binding routing key `{queueBindValue.RoutingKey}` to queue `{queueBindValue.QueueName}`");
+                queueNames.Add(queueBindValue.QueueName);
             }
 
             channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
@@ -131,7 +134,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 _logger?.LogInformation($"Reply message: {replyMessage}.");
                 var replyBytes = Encoding.UTF8.GetBytes(replyMessage);
                 var queueBindValue = _queueBindValueProvider.GetValue(messageType);
-                channel.BasicPublish(exchange: queueBindValue.Exchange, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);
+                channel.BasicPublish(exchange: queueBindValue.ExchangeName, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);
                 channel.BasicAck(e.DeliveryTag, false);
             }
         }

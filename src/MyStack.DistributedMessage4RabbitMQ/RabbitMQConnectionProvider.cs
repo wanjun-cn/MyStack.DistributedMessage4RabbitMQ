@@ -5,11 +5,11 @@ using RabbitMQ.Client;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
-    public class RabbitMQProvider
+    public class RabbitMQConnectionProvider
     {
         private readonly SemaphoreSlim _connectionLock = new(initialCount: 1, maxCount: 1);
         private readonly RabbitMQOptions _options;
-        public RabbitMQProvider(IOptions<RabbitMQOptions> optionsAccessor)
+        public RabbitMQConnectionProvider(IOptions<RabbitMQOptions> optionsAccessor)
         {
             _options = optionsAccessor.Value;
         }
