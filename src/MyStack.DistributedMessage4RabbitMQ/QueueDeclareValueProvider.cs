@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents the service for providing queue definition values.
+    /// </summary>    
     public class QueueDeclareValueProvider
     {
         public QueueDeclareValue GetValue([NotNull] Type messageType, [NotNull] QueueDeclareValue defaultValue)

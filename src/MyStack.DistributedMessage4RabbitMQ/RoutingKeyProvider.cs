@@ -2,6 +2,9 @@
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents the service for providing routing keys.
+    /// </summary>
     public class RoutingKeyProvider
     {
         private readonly RabbitMQOptions _options;

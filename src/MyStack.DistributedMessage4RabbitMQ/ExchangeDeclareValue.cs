@@ -2,26 +2,29 @@
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents the value of an exchange.
+    /// </summary>
     public class ExchangeDeclareValue
     {
         /// <summary>
-        /// Gets or sets the exchange type
+        /// The name of the exchange.
         /// </summary>
-        public string? ExchangeType { get; set; }
+        public string Name { get; set; } = default!;
         /// <summary>
-        /// Gets or sets the exchange name
+        /// The type of the exchange.
         /// </summary>
-        public string? Name { get; set; }
+        public string ExchangeType { get; set; } = default!;
         /// <summary>
-        /// Gets or sets whether the exchange is durable
+        /// Whether the exchange is durable. Non-durable exchanges will be cleared when RabbitMQ is closed.
         /// </summary>
         public bool Durable { get; set; }
         /// <summary>
-        /// Gets or sets whether the exchange is auto-deleted
+        /// Whether the exchange is auto-deleted. If there are no queues bound to it, it will be deleted automatically.
         /// </summary>
         public bool AutoDelete { get; set; }
         /// <summary>
-        /// Gets or sets additional arguments for the exchange
+        /// Additional arguments for the exchange.
         /// </summary>
         public Dictionary<string, object?>? Arguments { get; set; }
     }

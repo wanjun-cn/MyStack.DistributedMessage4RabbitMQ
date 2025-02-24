@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a distributed event handler interface
+    /// Represents an interface for distributed event handling services.
     /// </summary>
-    /// <typeparam name="TDistributedEvent">The type of the distributed event</typeparam>
+    /// <typeparam name="TDistributedEvent">Indicates the type of the distributed event.</typeparam>
     public interface IDistributedEventHandler<TDistributedEvent>
         where TDistributedEvent : class, IDistributedEvent
     {
         /// <summary>
-        /// The task of handle a message
+        /// The task for handling the event.
         /// </summary>
-        /// <param name="eventData">The message object</param>
-        /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="eventData">The distributed event object.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task HandleAsync(TDistributedEvent eventData, CancellationToken cancellationToken = default);
     }

@@ -16,12 +16,12 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     public class RabbitMQDistributedMessageBus : IDistributedMessageBus
     {
-        private readonly RabbitMQProvider _rabbitMQProvider;
+        private readonly RabbitMQConnectionProvider _rabbitMQProvider;
         private readonly QueueBindValueProvider _queueBindValueProvider;
         private readonly RoutingKeyProvider _routingKeyProvider;
         private readonly ILogger<RabbitMQDistributedMessageBus> _logger;
         private readonly RabbitMQOptions _options;
-        public RabbitMQDistributedMessageBus(RabbitMQProvider rabbitMQProvider,
+        public RabbitMQDistributedMessageBus(RabbitMQConnectionProvider rabbitMQProvider,
         QueueBindValueProvider queueBindValueProvider,
         RoutingKeyProvider routingKeyProvider,
         ILogger<RabbitMQDistributedMessageBus> logger,
@@ -43,7 +43,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 {
                     basicProperties.Headers.TryAdd(headersAttribute.Key, headersAttribute.Value);
                 }
-
             }
 
             if (eventData is IDistributedEvent distributedEvent)
@@ -83,7 +82,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
             // Publish message
             var queueBindValue = _queueBindValueProvider.GetValue(eventData.GetType());
-            channel.BasicPublish(queueBindValue.Exchange, queueBindValue.RoutingKey, true, basicProperties, sendBytes);
+            channel.BasicPublish(queueBindValue.ExchangeName, queueBindValue.RoutingKey, true, basicProperties, sendBytes);
             _logger?.LogInformation($"[{queueBindValue.RoutingKey}] Published message: {sendData}.");
             await Task.CompletedTask;
         }
@@ -97,7 +96,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 throw new ArgumentNullException(nameof(requestData), "Event data cannot be null");
             BlockingCollection<string> responseMessages = new BlockingCollection<string>();
             var queueBindValue = _queueBindValueProvider.GetValue(requestData.GetType());
-            var exchangeName = queueBindValue.Exchange;
+            var exchangeName = queueBindValue.ExchangeName;
             var routingKey = queueBindValue.RoutingKey;
 
             // Set the reply queue and routing key

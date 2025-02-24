@@ -4,20 +4,20 @@ using System.Threading.Tasks;
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a request handling interface
+    /// Represents an interface for RPC message handling services.
     /// </summary>
-    /// <typeparam name="TRpcRequest">The type of the request</typeparam>
-    /// <typeparam name="TRpcResponse">The type of the response</typeparam>
+    /// <typeparam name="TRpcRequest">Indicates the type of the RPC request data.</typeparam>
+    /// <typeparam name="TRpcResponse">Indicates the type of the RPC response data.</typeparam>
     public interface IRpcRequestHandler<TRpcRequest, TRpcResponse>
         where TRpcRequest : class, IRpcRequest<TRpcResponse>
         where TRpcResponse : class
     {
         /// <summary>
-        /// The task of handle a RPC message
+        /// The task for handling the RPC message.
         /// </summary>
-        /// <param name="requestData">The request object</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>The result after processing</returns>
+        /// <param name="requestData">The RPC request message object.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         Task<TRpcResponse> HandleAsync(TRpcRequest requestData, CancellationToken cancellationToken = default);
     }
 }

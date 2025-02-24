@@ -4,8 +4,17 @@ using System.Reflection;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents a service for providing exchange values.
+    /// </summary>
     public class ExchangeDeclareValueProvider
     {
+        /// <summary>
+        /// Retrieves the exchange value from the message type.
+        /// </summary>
+        /// <param name="messageType">The message type.</param>
+        /// <param name="defaultValue">The default exchange value.</param>
+        /// <returns></returns>
         public ExchangeDeclareValue GetValue([NotNull] Type messageType, [NotNull] ExchangeDeclareValue defaultValue)
         {
             if (messageType.IsGenericType && messageType.GetGenericTypeDefinition() == typeof(DistributedEventWrapper<>))

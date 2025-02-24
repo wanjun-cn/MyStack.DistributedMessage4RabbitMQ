@@ -2,26 +2,29 @@
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
+    /// <summary>
+    /// Represents the value for defining a queue.
+    /// </summary>
     public class QueueDeclareValue
     {
         /// <summary>
-        /// Gets or sets the queue name
+        /// The name of the queue.
         /// </summary>
         public string Name { get; set; } = default!;
         /// <summary>
-        /// Gets or sets whether the queue is durable
+        /// Whether the queue is durable.
         /// </summary>
         public bool Durable { get; set; }
         /// <summary>
-        /// Gets or sets whether the queue is exclusive
+        /// Whether the queue is exclusive.
         /// </summary>
         public bool Exclusive { get; set; }
         /// <summary>
-        /// Gets or sets whether the queue is auto-deleted
+        /// Whether the queue is automatically deleted.
         /// </summary>
         public bool AutoDelete { get; set; }
         /// <summary>
-        /// Gets or sets additional arguments for the queue
+        /// Additional arguments for the queue.
         /// </summary>
         public Dictionary<string, object?>? Arguments { get; set; }
     }

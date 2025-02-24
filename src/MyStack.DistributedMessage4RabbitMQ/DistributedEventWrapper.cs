@@ -1,9 +1,9 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents an event wrapper
+    /// Represents a wrapper for distributed events.
     /// </summary>
-    /// <typeparam name="TEventData">The type of event data</typeparam>
+    /// <typeparam name="TEventData">Indicates the type of event data.</typeparam>
     public class DistributedEventWrapper<TEventData> : DistributedEventBase
     {
         public TEventData EventData { get; }
@@ -14,7 +14,7 @@
     }
 
     /// <summary>
-    /// Represents an event wrapper
+    /// Represents the default wrapper for distributed events.
     /// </summary>
     public class DistributedEventWrapper : DistributedEventWrapper<object>
     {

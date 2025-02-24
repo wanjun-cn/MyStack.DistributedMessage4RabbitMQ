@@ -46,7 +46,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
             {
                 Message = "Hello World"
             };
-            hello.Metadata.Add("key1", "key1");
+            hello.Metadata.AddRabbitHeaders("key1", "key1");
             messageBus.PublishAsync(hello);
             messageBus.PublishAsync(new WrappedData());
             // Publish a message and wait for a reply

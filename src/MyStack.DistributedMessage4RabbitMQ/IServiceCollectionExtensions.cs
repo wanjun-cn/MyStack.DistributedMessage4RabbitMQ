@@ -8,6 +8,13 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     public static class IServiceCollectionExtensions
     {
+        /// <summary>
+        /// Adds distributed messaging (RabbitMQ) to the service collection.
+        /// </summary>
+        /// <param name="services">The dependency service collection interface.</param>
+        /// <param name="configure">The RabbitMQ configuration.</param>
+        /// <param name="assemblies">The assemblies for registering message subscriptions.</param>
+        /// <returns></returns>
         public static IServiceCollection AddDistributedMessage4RabbitMQ(this IServiceCollection services, Action<RabbitMQOptions> configure, params Assembly[] assemblies)
         {
 
@@ -45,7 +52,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             services.AddTransient<ExchangeDeclareValueProvider>();
             services.AddTransient<QueueDeclareValueProvider>();
             services.AddTransient<RoutingKeyProvider>();
-            services.AddTransient<RabbitMQProvider>();
+            services.AddTransient<RabbitMQConnectionProvider>();
             services.AddTransient<IDistributedMessageBus, RabbitMQDistributedMessageBus>();
             services.Configure(configure);
             services.AddSingleton<ISubscriptionRegistrar, SubscriptionManager>();
