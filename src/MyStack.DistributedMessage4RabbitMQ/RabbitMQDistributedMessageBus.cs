@@ -70,12 +70,33 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
         public async Task PublishAsync(object eventData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _rabbitMQProvider.GetConnectionAsync(cancellationToken);
             using var channel = connection.CreateModel();
-            cancellationToken.ThrowIfCancellationRequested();
             if (eventData == null)
                 throw new ArgumentNullException(nameof(eventData), "Event data cannot be null");
-            var sendData = JsonConvert.SerializeObject(eventData);
+            object? messageData = eventData;
+
+            if (eventData is IDistributedEvent distributedEvent)
+            {
+                if (metadata != null)
+                {
+                    foreach (var key in metadata.Keys)
+                        distributedEvent.Metadata.TryAdd(key, metadata[key]);
+                }
+            }
+            else
+            {
+                var eventWrapperType = typeof(DistributedEventWrapper<>).MakeGenericType(eventData.GetType());
+                messageData = Activator.CreateInstance(eventWrapperType, eventData);
+                if (metadata != null)
+                {
+                    foreach (var key in metadata.Keys)
+                        ((dynamic)messageData!).Metadata.TryAdd(key, metadata[key]);
+                }
+            }
+
+            var sendData = JsonConvert.SerializeObject(messageData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             SetHeaders(eventData, basicProperties, metadata);
@@ -89,11 +110,17 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 
         public async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _rabbitMQProvider.GetConnectionAsync(cancellationToken);
             using var channel = connection.CreateModel();
-            cancellationToken.ThrowIfCancellationRequested();
             if (requestData == null)
                 throw new ArgumentNullException(nameof(requestData), "Event data cannot be null");
+            if (metadata != null)
+            {
+                foreach (var key in metadata.Keys)
+                    requestData.Metadata.TryAdd(key, metadata[key]);
+            }
+
             BlockingCollection<string> responseMessages = new BlockingCollection<string>();
             var queueBindValue = _queueBindValueProvider.GetValue(requestData.GetType());
             var exchangeName = queueBindValue.ExchangeName;
