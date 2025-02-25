@@ -8,12 +8,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     {
         private static readonly Dictionary<Type, List<string>> _subscriptions = new Dictionary<Type, List<string>>();
         private readonly QueueBindValueProvider _queueBindValueProvider;
-        private readonly RoutingKeyProvider _routingKeyProvider;
-        public SubscriptionManager(QueueBindValueProvider queueBindValueProvider,
-            RoutingKeyProvider routingKeyProvider)
+        public SubscriptionManager(QueueBindValueProvider queueBindValueProvider)
         {
             _queueBindValueProvider = queueBindValueProvider;
-            _routingKeyProvider = routingKeyProvider;
         }
         public void Subscribe(params Type[] messagetypes)
         {
@@ -26,8 +23,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                     _subscriptions[messageType] = value;
                 }
                 var queueBindValue = _queueBindValueProvider.GetValue(messageType);
-                var routingKey = _routingKeyProvider.GetValue(queueBindValue.RoutingKey);
-                value.Add(routingKey);
+                value.Add(queueBindValue.RoutingKey);
             }
         }
 
