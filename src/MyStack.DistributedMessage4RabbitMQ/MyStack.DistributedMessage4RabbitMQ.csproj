@@ -4,32 +4,31 @@
 		<Nullable>enable</Nullable>
 		<TargetFrameworks>net6.0;net7.0;net8.0;</TargetFrameworks>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Title>MyStack.DistributedMessage4RabbitMQ</Title>
-		<Version>2.0.3</Version>
+		<Title>DistributedMessage4RabbitMQ</Title>
+		<Version>1.0.0</Version>
 		<Authors>Jun Wan</Authors>
 		<Company>Jun Wan</Company>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>NUGET.md</PackageReadmeFile>
 		<Description>
 			An open-source lightweight distributed messaging bus library (RabbitMQ).
 
-Add Service:
-services.AddDistributedMessage4RabbitMQ(configure =&gt;
-{
-	configure.HostName = "localhost";
-	configure.VirtualHost = "/";
-	configure.Port = 5672;
-	configure.UserName = "admin";
-	configure.Password = "admin";
-	configure.QueueOptions.Name = "MyStack";
-	configure.ExchangeOptions.Name = "MyStack";
-	configure.ExchangeOptions.ExchangeType = "topic";
-	configure.RPCTimeout = 2000;
-},
-Assembly.GetExecutingAssembly());
+			Add Service:
+			services.AddDistributedMessage4RabbitMQ(configure =&gt;
+			{
+			configure.HostName = "localhost";
+			configure.VirtualHost = "/";
+			configure.Port = 5672;
+			configure.UserName = "admin";
+			configure.Password = "admin";
+			configure.QueueOptions.Name = "MyStack";
+			configure.ExchangeOptions.Name = "MyStack";
+			configure.ExchangeOptions.ExchangeType = "topic";
+			configure.RPCTimeout = 2000;
+			},
+			Assembly.GetExecutingAssembly());
 
-Publish a Message:
-await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
+			Publish a Message:
+			await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
 
 		</Description>
 		<Title>Microsoft.Extensions.DistributedMessage4RabbitMQ</Title>
@@ -38,7 +37,8 @@ await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
 		<RepositoryUrl>https://github.com/june-it/MyStack.DistributedMessage4RabbitMQ.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<PackageTags>MyStack;RabbitMQ;DistributedEvent;RPC</PackageTags>
+		<PackageTags>DistributedMessage4RabbitMQ;RabbitMQ;DistributedEvent;RPC</PackageTags>
+		<AssemblyName>DistributedMessage4RabbitMQ</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -51,10 +51,6 @@ await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
 
 	<ItemGroup>
 		<None Include="..\..\icon.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="..\..\NUGET.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
