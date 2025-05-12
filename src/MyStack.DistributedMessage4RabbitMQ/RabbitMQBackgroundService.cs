@@ -27,6 +27,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly RabbitMQOptions _options;
         private readonly ILogger<RabbitMQBackgroundService> _logger;
         private readonly SubscriptionManager _subscriptionManager;
+        private readonly IMessageSerializer _messageSerializer;
         public RabbitMQBackgroundService(IServiceProvider serviceProvider,
                 RabbitMQConnectionProvider connectionProvider,
                 ExchangeDeclareValueProvider exchangeDeclareValueProvider,
@@ -34,7 +35,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 QueueBindValueProvider queueBindValueProvider,
                 IOptions<RabbitMQOptions> options,
                 ILogger<RabbitMQBackgroundService> logger,
-                SubscriptionManager subscriptionManager
+                SubscriptionManager subscriptionManager,
+                IMessageSerializer messageSerializer
             )
         {
             _serviceProvider = serviceProvider;
@@ -45,6 +47,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             _options = options.Value;
             _logger = logger;
             _subscriptionManager = subscriptionManager;
+            _messageSerializer = messageSerializer;
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -67,7 +70,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 channel.QueueDeclare(queueBindValue.QueueName, queueDeclareValue.Durable, queueDeclareValue.Exclusive, queueDeclareValue.AutoDelete, queueDeclareValue.Arguments);
                 channel.ExchangeDeclare(queueBindValue.ExchangeName, exchangeDeclareValue.ExchangeType ?? "topic", exchangeDeclareValue.Durable, exchangeDeclareValue.AutoDelete, exchangeDeclareValue.Arguments);
                 channel.QueueBind(queueBindValue.QueueName, queueBindValue.ExchangeName, queueBindValue.RoutingKey, null);
-                _logger?.LogInformation($"Binding routing key `{queueBindValue.RoutingKey}` to queue `{queueBindValue.QueueName}`");
+                _logger?.LogInformation("Binding routing key `{@RoutingKey}` to queue `{@QueueName}`", queueBindValue.RoutingKey, queueBindValue.QueueName);
                 queueNames.Add(queueBindValue.QueueName);
             }
 
@@ -86,7 +89,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                     consumer.Received += async (ch, ea) =>
                     {
                         var receivedMessage = Encoding.UTF8.GetString(ea.Body.Span);
-                        _logger?.LogInformation($"Received message: {receivedMessage}.");
+                        _logger?.LogInformation("Received message: {@ReceivedMessage}.", receivedMessage);
 
                         if (string.IsNullOrEmpty(receivedMessage))
                             return;
@@ -95,7 +98,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                             return;
                         foreach (var subscription in subscriptions)
                         {
-                            object? eventData = JsonConvert.DeserializeObject(receivedMessage, subscription);
+                            object? eventData = _messageSerializer.Deserialize(receivedMessage, subscription);
                             if (eventData == null)
                                 return;
 
@@ -124,14 +127,14 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 var requestHandlerType = typeof(IRpcRequestHandler<,>).MakeGenericType(messageType, responseType);
                 var requestHandler = _serviceProvider.GetRequiredService(requestHandlerType);
                 var replyMessageObj = await ((dynamic)requestHandler).HandleAsync((dynamic)eventData, cancellationToken);
-                replyMessage = JsonConvert.SerializeObject(replyMessageObj);
+                replyMessage = _messageSerializer.Serialize(replyMessageObj);
             }
             finally
             {
                 var properties = e.BasicProperties;
                 var replyProperties = channel.CreateBasicProperties();
                 replyProperties.CorrelationId = properties.CorrelationId;
-                _logger?.LogInformation($"Reply message: {replyMessage}.");
+                _logger?.LogInformation("Reply message: {@ReplyMessage}.", replyMessage);
                 var replyBytes = Encoding.UTF8.GetBytes(replyMessage);
                 var queueBindValue = _queueBindValueProvider.GetValue(messageType);
                 channel.BasicPublish(exchange: queueBindValue.ExchangeName, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);

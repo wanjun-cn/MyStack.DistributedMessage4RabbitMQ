@@ -65,6 +65,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             if (assemblies != null && assemblies.Length != 0)
                 services.AddHostedService<RabbitMQBackgroundService>();
 
+            services.AddTransient<IMessageSerializer, JsonMessageSerializer>();
+
             return services;
         }
     }

@@ -5,7 +5,7 @@
 		<TargetFrameworks>net6.0;net7.0;net8.0;</TargetFrameworks>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>DistributedMessage4RabbitMQ</Title>
-		<Version>1.0.0</Version>
+		<Version>1.0.4</Version>
 		<Authors>Jun Wan</Authors>
 		<Company>Jun Wan</Company>
 		<PackageIcon>icon.png</PackageIcon>

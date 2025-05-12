@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DistributedMessage4RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyStack.DistributedMessage4RabbitMQ.Producer;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Consumer
 {
@@ -35,6 +37,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Consumer
                        configure.ExchangeOptions.ExchangeType = "topic";
                    },
                    Assembly.GetExecutingAssembly());
+                   services.Replace(new ServiceDescriptor(typeof(IMessageSerializer), typeof(CustomJsonMessageSerializer), ServiceLifetime.Transient));
                });
 
             var app = builder.Build();

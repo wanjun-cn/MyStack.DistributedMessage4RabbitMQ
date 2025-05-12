@@ -21,17 +21,20 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         private readonly RoutingKeyProvider _routingKeyProvider;
         private readonly ILogger<RabbitMQDistributedMessageBus> _logger;
         private readonly RabbitMQOptions _options;
+        private readonly IMessageSerializer _messageSerializer;
         public RabbitMQDistributedMessageBus(RabbitMQConnectionProvider rabbitMQProvider,
         QueueBindValueProvider queueBindValueProvider,
         RoutingKeyProvider routingKeyProvider,
         ILogger<RabbitMQDistributedMessageBus> logger,
-        IOptions<RabbitMQOptions> optionsAccessor)
+        IOptions<RabbitMQOptions> optionsAccessor,
+        IMessageSerializer messageSerializer)
         {
             _rabbitMQProvider = rabbitMQProvider;
             _queueBindValueProvider = queueBindValueProvider;
             _routingKeyProvider = routingKeyProvider;
             _logger = logger;
             _options = optionsAccessor.Value;
+            _messageSerializer = messageSerializer;
         }
         private void SetHeaders(object eventData, IBasicProperties basicProperties, MessageMetadata? metadata)
         {
@@ -45,9 +48,9 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 }
             }
 
-            if (eventData is IDistributedEvent distributedEvent)
+            if (eventData is IHasMessageMetadata hasMessageMetadata)
             {
-                var metadataAttributes = distributedEvent.Metadata.Where(x => x.Key.StartsWith(MyStackConsts.RABBITMQ_HEADER));
+                var metadataAttributes = hasMessageMetadata.Metadata.Where(x => x.Key.StartsWith(MyStackConsts.RABBITMQ_HEADER));
                 if (metadataAttributes.Any())
                 {
                     foreach (var metadataAttribute in metadataAttributes)
@@ -95,8 +98,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                         ((dynamic)messageData!).Metadata.TryAdd(key, metadata[key]);
                 }
             }
-
-            var sendData = JsonConvert.SerializeObject(messageData);
+            var sendData = _messageSerializer.Serialize(messageData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             var basicProperties = channel.CreateBasicProperties();
             SetHeaders(eventData, basicProperties, metadata);
@@ -104,7 +106,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             // Publish message
             var queueBindValue = _queueBindValueProvider.GetValue(eventData.GetType());
             channel.BasicPublish(queueBindValue.ExchangeName, queueBindValue.RoutingKey, true, basicProperties, sendBytes);
-            _logger?.LogInformation($"[{queueBindValue.RoutingKey}] Published message: {sendData}.");
+            _logger?.LogInformation("[{@RoutingKey}] Published message: {@SendData}.", queueBindValue.RoutingKey, sendData);
             await Task.CompletedTask;
         }
 
@@ -144,19 +146,19 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 {
                     responseMessages.Add(replyMessage);
                 }
-                _logger?.LogInformation($"[{routingKey}] Received reply: {replyMessage}.");
+                _logger?.LogInformation("[{@RoutingKey}] Received reply: {@ReplyMessage}.", routingKey, replyMessage);
             };
             channel.BasicConsume(queue: replyQueueName, autoAck: true, consumer: consumer);
 
             // Publish message to the queue
-            var sendData = JsonConvert.SerializeObject(requestData);
+            var sendData = _messageSerializer.Serialize(requestData);
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             channel.BasicPublish(
                 exchange: exchangeName,
                 routingKey: routingKey,
                 basicProperties: basicProperties,
                 body: sendBytes);
-            _logger?.LogInformation($"[{routingKey}] Published message: {sendData}.");
+            _logger?.LogInformation("[{@RoutingKey}] Published message: {@SendData}.", routingKey, sendData);
 
             // Get the RPC request timeout
             int millisecondsTimeout = -1;
@@ -170,8 +172,8 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             }
             // Get the RPC response message
             if (!responseMessages.TryTake(out var responseMessage, millisecondsTimeout, cancellationToken))
-                throw new RpcTimeoutException("Response timeout when sending RPC request", millisecondsTimeout, routingKey);
-            return JsonConvert.DeserializeObject<TRpcResponse>(responseMessage);
+                throw new RpcTimeoutException("Response timeout when sending RPC request", millisecondsTimeout, routingKey); 
+            return  _messageSerializer.Deserialize<TRpcResponse>(responseMessage);
         }
     }
 }
