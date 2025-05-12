@@ -2,8 +2,9 @@ using Microsoft.Extensions.DistributedMessage4RabbitMQ;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Shared
 {
-    [MessageMetadata("A", "A")]
-    public class Ping : IRpcRequest<Pong>
+
+    [Headers("A", "A")]
+    public class Ping : RpcRequestBase<Pong>
     {
         public string SendBy { get; set; } = default!;
     }

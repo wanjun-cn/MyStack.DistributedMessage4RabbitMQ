@@ -1,101 +1,125 @@
-﻿using System.Collections.Generic;
-
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a RabbitMQ configuration option
+    /// Represents the RabbitMQ configuration options.
     /// </summary>
     public class RabbitMQOptions
     {
+        private string? _userName; 
         /// <summary>
         /// Gets or sets the username
         /// </summary>
-        public string UserName { get; set; } = "guest";
+        public string UserName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_userName))
+                    _userName = "guest";
+                return _userName;
+            }
+            set
+            {
+                _userName = value;
+            }
+        }
+        private string? _password;
         /// <summary>
         /// Gets or sets the password
         /// </summary>
-        public string Password { get; set; } = "guest";
+        public string Password
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_password))
+                    _password = "guest";
+                return _password;
+            }
+            set
+            {
+                _password = value;
+            }
+        }
+
+        private string? _hostName;
         /// <summary>
         /// Gets or sets the host name
         /// </summary>
-        public string HostName { get; set; } = "localhost";
+        public string HostName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_hostName))
+                    _hostName = "localhost";
+                return _hostName;
+            }
+            set
+            {
+                _hostName = value;
+            }
+        }
+        private int? _port;
         /// <summary>
         /// Gets or sets the port
         /// </summary>
-        public int Port { get; set; } = 5672; // Corrected the default port for RabbitMQ
+        public int Port
+        {
+            get
+            {
+                _port ??= 5672;
+                return _port.Value;
+            }
+            set
+            {
+                _port = value;
+            }
+        }
+
+        private string? _virtualHost;
         /// <summary>
         /// Gets or sets the virtual host name
         /// </summary>
-        public string VirtualHost { get; set; } = "/";
+        public string VirtualHost
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_virtualHost))
+                    _virtualHost = "/";
+                return _virtualHost;
+            }
+            set
+            {
+                _virtualHost = value;
+            }
+        }
         /// <summary>
         /// Gets or sets the routing key prefix
         /// </summary>
         public string? RoutingKeyPrefix { get; set; }
+
+        private int? _rpcTimeout;
         /// <summary>
         /// Gets or sets the RPC timeout (in milliseconds)
         /// </summary>
-        public int RPCTimeout { get; set; } = 10000;
+        public int RPCTimeout
+        {
+            get
+            {
+                _rpcTimeout ??= 10000;
+                return _rpcTimeout.Value;
+            }
+            set
+            {
+                _rpcTimeout = value;
+            }
+        }
         /// <summary>
         /// Gets the exchange configuration options
         /// </summary>
-        public RabbitMQExchangeOptions ExchangeOptions { get; set; } = new RabbitMQExchangeOptions();
+        public ExchangeDeclareValue ExchangeOptions { get; set; } = new ExchangeDeclareValue();
         /// <summary>
         /// Gets the queue configuration options
         /// </summary>
-        public RabbitMQQueueOptions QueueOptions { get; set; } = new RabbitMQQueueOptions();
+        public QueueDeclareValue QueueOptions { get; set; } = new QueueDeclareValue();
     }
 
-    /// <summary>
-    /// Represents exchange configuration options
-    /// </summary>
-    public class RabbitMQExchangeOptions
-    {
-        /// <summary>
-        /// Gets or sets the exchange type
-        /// </summary>
-        public string ExchangeType { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets the exchange name
-        /// </summary>
-        public string Name { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets whether the exchange is durable
-        /// </summary>
-        public bool Durable { get; set; }
-        /// <summary>
-        /// Gets or sets whether the exchange is auto-deleted
-        /// </summary>
-        public bool AutoDelete { get; set; }
-        /// <summary>
-        /// Gets or sets additional arguments for the exchange
-        /// </summary>
-        public Dictionary<string, object>? Arguments { get; set; }
-    }
-
-    /// <summary>
-    /// Represents queue configuration options
-    /// </summary>
-    public class RabbitMQQueueOptions
-    {
-        /// <summary>
-        /// Gets or sets the queue name
-        /// </summary>
-        public string Name { get; set; } = default!;
-        /// <summary>
-        /// Gets or sets whether the queue is durable
-        /// </summary>
-        public bool Durable { get; set; }
-        /// <summary>
-        /// Gets or sets whether the queue is exclusive
-        /// </summary>
-        public bool Exclusive { get; set; }
-        /// <summary>
-        /// Gets or sets whether the queue is auto-deleted
-        /// </summary>
-        public bool AutoDelete { get; set; }
-        /// <summary>
-        /// Gets or sets additional arguments for the queue
-        /// </summary>
-        public Dictionary<string, object>? Arguments { get; set; }
-    }
 }

@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DistributedMessage4RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyStack.DistributedMessage4RabbitMQ.Shared;
-using System.Reflection;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Producer
 {
@@ -20,10 +21,10 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                })
                .ConfigureServices((context, services) =>
                {
-                   services.AddLogging(logging =>
-                   {
-                       logging.AddConsole();
-                   });
+               services.AddLogging(logging =>
+               {
+                   logging.AddConsole();
+               });
                    services.AddDistributedMessage4RabbitMQ(configure =>
                    {
                        configure.HostName = "localhost";
@@ -36,18 +37,23 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                        configure.ExchangeOptions.ExchangeType = "topic";
                        configure.RPCTimeout = 2000000;
                    },
+                 
+
                    Assembly.GetExecutingAssembly());
-               });
+                 
+
+        });
 
             var app = builder.Build();
 
-            var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
-            messageBus.PublishAsync(new HelloMessage()
-            {
-                Message = "Hello World"
-            });
+        var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
+        var hello = new HelloMessage()
+        {
+            Message = "Hello World"
+        };
+        hello.Metadata.AddRabbitHeaders("key1", "key1");
+            messageBus.PublishAsync(hello);
             messageBus.PublishAsync(new WrappedData());
-            messageBus.PublishAsync("ABC",new SubscribeData());
             // Publish a message and wait for a reply
             while (true)
             {
@@ -58,9 +64,9 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                 {
                     SendBy = "A"
                 };
-                var pongMessage = messageBus.SendAsync(ping).GetAwaiter().GetResult();
-                Console.WriteLine(pongMessage?.ReplyBy);
+        var pongMessage = messageBus.SendAsync(ping).GetAwaiter().GetResult();
+        Console.WriteLine(pongMessage?.ReplyBy);
             }
-        }
+}
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     /// <summary>
-    /// Represents a distributed event interface
+    /// Represents an interface for distributed events.
     /// </summary>
-    public interface IDistributedEvent
+    public interface IDistributedEvent: IHasMessageMetadata
     {
     }
 }
