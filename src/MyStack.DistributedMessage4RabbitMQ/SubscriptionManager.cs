@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             {
                 foreach (var subscribeKey in subscription.Value)
                 {
-                    if (IsMatch(messageKey, subscribeKey))
+                    if (IsMatch(subscribeKey, messageKey))
                     {
                         subscriptions.Add(subscription.Key);
                         break;
@@ -55,5 +55,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                 .Replace("#", ".*");  // Replace # in the pattern with .* to match any number of any characters
             return System.Text.RegularExpressions.Regex.IsMatch(input, $"^{pattern}$");
         }
+
     }
 }
