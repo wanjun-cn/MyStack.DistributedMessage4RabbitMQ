@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Serialization;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyStack.DistributedMessage4RabbitMQ.Shared;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Consumer
 {
@@ -25,16 +27,20 @@ namespace MyStack.DistributedMessage4RabbitMQ.Consumer
                    });
                    services.AddDistributedMessage4RabbitMQ(configure =>
                    {
-                       configure.HostName = "localhost";
+                       configure.HostName = "127.0.0.1";
                        configure.VirtualHost = "/";
                        configure.Port = 5672;
                        configure.UserName = "admin";
                        configure.Password = "admin";
-                       configure.QueueOptions.Name = "MyStack";
-                       configure.ExchangeOptions.Name = "MyStack";
+                       configure.PrefetchCount = 5;
+                       configure.RoutingKeyPrefix = $"*.*.";
+                       configure.ExchangeOptions.Name = "MultiwayLogistics";
                        configure.ExchangeOptions.ExchangeType = "topic";
+                       configure.ExchangeOptions.Durable = true;
+                       configure.QueueOptions.Durable = true;
                    },
                    Assembly.GetExecutingAssembly());
+                   services.Replace(new ServiceDescriptor(typeof(IMessageSerializer), typeof(CustomJsonMessageSerializer), ServiceLifetime.Transient));
                });
 
             var app = builder.Build();

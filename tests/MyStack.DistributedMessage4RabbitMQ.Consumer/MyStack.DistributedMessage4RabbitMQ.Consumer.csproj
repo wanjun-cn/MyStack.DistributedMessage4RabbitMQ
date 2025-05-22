@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MissionNotificationEtoHandler.cs" />
+    <Compile Remove="RcsAgvMissionTypeEtoHandler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
   <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
   </ItemGroup>
 

@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Serialization;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
@@ -55,15 +60,21 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             services.AddTransient<RabbitMQConnectionProvider>();
             services.AddTransient<IDistributedMessageBus, RabbitMQDistributedMessageBus>();
             services.Configure(configure);
-            services.AddSingleton<ISubscriptionRegistrar, SubscriptionManager>();
-            services.AddSingleton<SubscriptionManager>(factory =>
+            services.AddSingleton<ISubscriptionRegistrar, SubscriptionService>();
+            services.AddSingleton<ISubscriptionService>(factory =>
             {
                 var subscriptionManager = factory.GetRequiredService<ISubscriptionRegistrar>();
                 subscriptionManager.Subscribe(messageTypes.ToArray());
-                return (SubscriptionManager)subscriptionManager;
+                return (SubscriptionService)subscriptionManager;
             });
             if (assemblies != null && assemblies.Length != 0)
                 services.AddHostedService<RabbitMQBackgroundService>();
+
+            services.AddTransient<IMessageSerializer, JsonMessageSerializer>();
+            services.AddTransient<QueueInitializer>();
+            services.AddTransient<DistributedEventHandler>();
+            services.AddTransient<RpcRequestHandler>();
+            services.AddTransient<RetryHandler>();
 
             return services;
         }

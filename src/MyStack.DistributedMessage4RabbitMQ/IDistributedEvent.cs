@@ -3,11 +3,7 @@
     /// <summary>
     /// Represents an interface for distributed events.
     /// </summary>
-    public interface IDistributedEvent
+    public interface IDistributedEvent : IHasMessageMetadata
     {
-        /// <summary>
-        /// The metadata of the message.
-        /// </summary>
-        MessageMetadata Metadata { get; }
     }
 }

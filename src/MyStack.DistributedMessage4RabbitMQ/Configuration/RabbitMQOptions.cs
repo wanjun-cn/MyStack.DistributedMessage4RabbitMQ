@@ -1,11 +1,11 @@
-﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+﻿namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration
 {
     /// <summary>
     /// Represents the RabbitMQ configuration options.
     /// </summary>
     public class RabbitMQOptions
     {
-        private string? _userName; 
+        private string? _userName;
         /// <summary>
         /// Gets or sets the username
         /// </summary>
@@ -112,6 +112,40 @@
                 _rpcTimeout = value;
             }
         }
+        private ushort? _prefetchCount;
+        /// <summary>
+        /// Gets or sets the prefetch count
+        /// </summary>
+        public ushort PrefetchCount
+        {
+            get
+            {
+                _prefetchCount ??= 1;
+                return _prefetchCount.Value;
+            }
+            set
+            {
+                _prefetchCount = value;
+            }
+        }
+
+        private ushort? _maxRetryCount;
+        /// <summary>
+        /// Gets or sets the maximum retry count
+        /// </summary>
+        public ushort MaxRetryCount
+        {
+            get
+            {
+                _maxRetryCount ??= 0;
+                return _maxRetryCount.Value;
+            }
+            set
+            {
+                _maxRetryCount = value;
+            }
+        }
+
         /// <summary>
         /// Gets the exchange configuration options
         /// </summary>

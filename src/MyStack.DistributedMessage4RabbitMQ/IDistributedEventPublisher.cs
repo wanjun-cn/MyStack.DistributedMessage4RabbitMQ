@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// </summary>
         /// <param name="eventData">The distributed event object.</param>
         /// <param name="metadata">The metadata of the message.
-        /// <para>If the key of the metadata is prefixed with <see cref="MyStackConsts.RABBITMQ_HEADER"/> ("rabbitmq."), the message header will be set in the RabbitMQ request header.</para>
+        /// <para>If the key of the metadata is prefixed with <see cref="MyStackConsts.MESSAGE_HEADER"/> ("rabbitmq."), the message header will be set in the RabbitMQ request header.</para>
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>

@@ -1,14 +1,13 @@
-﻿using MyStack.DistributedMessage4RabbitMQ.Shared;
+﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ;
+using MyStack.DistributedMessage4RabbitMQ.Shared;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Consumer
 {
-    public class HelloMessageHandler : MessageHandlerBase<HelloMessage>
+    public class HelloMessageHandler : IDistributedEventHandler<HelloMessage>
     {
-
-        protected async override Task InternalHandleAsync(HelloMessage eventData, CancellationToken cancellationToken = default)
+        public Task HandleAsync(HelloMessage eventData, CancellationToken cancellationToken = default)
         {
-            Console.WriteLine("Hello");
-            await Task.CompletedTask;
+            throw new Exception("A");
         }
     }
 }

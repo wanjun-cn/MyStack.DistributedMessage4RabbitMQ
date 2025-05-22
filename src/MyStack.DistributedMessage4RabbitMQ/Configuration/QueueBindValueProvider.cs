@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration
 {
     /// <summary>
     /// Represents a service for providing queue binding values.
@@ -37,22 +40,20 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             var exchangeDeclareValue = _exchangeDeclareValueProvider.GetValue(messageType, _options.ExchangeOptions);
             var queueDeclareValue = _queueDeclareValueProvider.GetValue(messageType, _options.QueueOptions);
             var queueBindAttribute = messageType.GetCustomAttribute<QueueBindAttribute>();
-
-            string queueName, exchangeName, eventName;
-            if (queueBindAttribute != null)
+            var xArgumentAttributes = messageType.GetCustomAttributes<XArgumentAttribute>().Where(x => x.Type == XArgumentType.QueueBind);
+            QueueBindValue queueBindValue = new()
             {
-                queueName = (!string.IsNullOrEmpty(queueBindAttribute.QueueName) ? queueBindAttribute.QueueName : queueDeclareValue.Name ?? MyStackConsts.DEFAULT_QUEUE_NAME)!;
-                exchangeName = (!string.IsNullOrEmpty(queueBindAttribute.ExchangeName) ? queueBindAttribute.ExchangeName : exchangeDeclareValue.Name ?? MyStackConsts.DEFAULT_EXCHANGE_NAME)!;
-                eventName = queueBindAttribute.RoutingKey;
-            }
-            else
+                QueueName = (!string.IsNullOrEmpty(queueBindAttribute?.QueueName) ? queueBindAttribute.QueueName : queueDeclareValue.Name ?? MyStackConsts.DEFAULT_QUEUE_NAME)!,
+                ExchangeName = (!string.IsNullOrEmpty(queueBindAttribute?.ExchangeName) ? queueBindAttribute.ExchangeName : exchangeDeclareValue.Name ?? MyStackConsts.DEFAULT_EXCHANGE_NAME)!,
+                RoutingKey = _routingKeyProvider.GetValue(!string.IsNullOrEmpty(queueBindAttribute?.RoutingKey) ? queueBindAttribute.RoutingKey : messageType.FullName!),
+                Arguments = new Dictionary<string, object?>()
+            };
+            if (xArgumentAttributes != null)
             {
-                queueName = queueDeclareValue.Name ?? MyStackConsts.DEFAULT_QUEUE_NAME;
-                exchangeName = exchangeDeclareValue.Name ?? MyStackConsts.DEFAULT_EXCHANGE_NAME;
-                eventName = messageType.FullName!;
+                foreach (var xArgument in xArgumentAttributes)
+                    queueBindValue.Arguments.TryAdd(xArgument.Key, xArgument.Value);
             }
-            var routingKey = _routingKeyProvider.GetValue(eventName);
-            return new QueueBindValue(queueName, exchangeName, routingKey);
+            return queueBindValue;
         }
     }
 }

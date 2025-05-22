@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
@@ -7,14 +8,14 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
     /// </summary>
     public class RoutingKeyProvider
     {
-        private readonly RabbitMQOptions _options;
+        protected RabbitMQOptions Options { get; }
         public RoutingKeyProvider(IOptions<RabbitMQOptions> optionsAccessor)
         {
-            _options = optionsAccessor.Value;
+            Options = optionsAccessor.Value;
         }
-        public string GetValue(string messageName)
+        public virtual string GetValue(string messageName)
         {
-            return _options.RoutingKeyPrefix + messageName;
+            return Options.RoutingKeyPrefix + messageName;
         }
     }
 }
