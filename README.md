@@ -1,4 +1,4 @@
-# MyStack.DistributedMessage4RabbitMQ
+# DistributedMessage4RabbitMQ
 
 An open-source lightweight message bus library (RabbitMQ) that supports publish/subscribe and RPC.
 
@@ -6,11 +6,11 @@ An open-source lightweight message bus library (RabbitMQ) that supports publish/
 | ----------- | ----------- | 
 | [![nuget](https://img.shields.io/nuget/v/DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/packages/DistributedMessage4RabbitMQ)    | [![stats](https://img.shields.io/nuget/dt/DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/stats/packages/DistributedMessage4RabbitMQ?groupby=Version)         |
 
-# Install MyStack.DistributedMessage4RabbitMQ
+# Install DistributedMessage4RabbitMQ
 
 You can install via NuGet:
 ```csharp
-Install-Package MyStack.DistributedMessage4RabbitMQ
+Install-Package DistributedMessage4RabbitMQ
 
 # Getting Started
 
