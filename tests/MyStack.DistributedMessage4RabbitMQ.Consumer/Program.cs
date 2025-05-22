@@ -27,12 +27,12 @@ namespace MyStack.DistributedMessage4RabbitMQ.Consumer
                    });
                    services.AddDistributedMessage4RabbitMQ(configure =>
                    {
-                       configure.HostName = "192.168.2.186";
+                       configure.HostName = "127.0.0.1";
                        configure.VirtualHost = "/";
                        configure.Port = 5672;
                        configure.UserName = "admin";
                        configure.Password = "admin";
-                       configure.PrefetchCount = 100;
+                       configure.PrefetchCount = 5;
                        configure.RoutingKeyPrefix = $"*.*.";
                        configure.ExchangeOptions.Name = "MultiwayLogistics";
                        configure.ExchangeOptions.ExchangeType = "topic";

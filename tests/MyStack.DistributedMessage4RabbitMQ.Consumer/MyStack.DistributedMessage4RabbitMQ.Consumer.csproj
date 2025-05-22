@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DistributedEventWrapperHandler.cs" />
-    <Compile Remove="HelloMessageHandler.cs" />
-    <Compile Remove="MessageHandlerBase.cs" />
     <Compile Remove="MissionNotificationEtoHandler.cs" />
-    <Compile Remove="PingHandler.cs" />
     <Compile Remove="RcsAgvMissionTypeEtoHandler.cs" />
   </ItemGroup>
 

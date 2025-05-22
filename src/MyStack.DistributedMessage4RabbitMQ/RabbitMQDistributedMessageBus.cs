@@ -49,15 +49,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                     basicProperties.Headers.TryAdd(headersAttribute.Key, headersAttribute.Value);
                 }
             }
-            var xArgumentAttributes = eventData.GetType().GetCustomAttributes<XArgumentAttribute>();
-            if (xArgumentAttributes != null)
-            {
-                basicProperties.Headers ??= new Dictionary<string, object?>();
-                foreach (var xArgumentAttribute in xArgumentAttributes)
-                {
-                    basicProperties.Headers.TryAdd(xArgumentAttribute.Key, xArgumentAttribute.Value);
-                }
-            }
             if (eventData is IHasMessageMetadata hasMessageMetadata)
             {
                 var metadataAttributes = hasMessageMetadata.Metadata.Where(x => x.Key.StartsWith(MyStackConsts.MESSAGE_HEADER));
@@ -70,7 +61,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
                     }
                 }
             }
-
             if (metadata != null)
             {
                 foreach (var kv in metadata.Where(x => x.Key.StartsWith(MyStackConsts.MESSAGE_HEADER)))

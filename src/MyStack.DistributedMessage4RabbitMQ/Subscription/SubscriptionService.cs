@@ -48,6 +48,10 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
                         }
                     }
                 }
+                if (RoutingKeyMaps.ContainsKey(routingKey))
+                    RoutingKeyMaps[routingKey] = messageTypes;
+                else
+                    RoutingKeyMaps.TryAdd(routingKey, messageTypes);
                 return messageTypes;
             }
 
@@ -85,7 +89,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
                 return false;
             if (messageTypes.Count > 1)
                 throw new InvalidOperationException("Multiple message types found for the same routing key.");
-            return messageTypes[0].GetInterfaces().Any(x => x == typeof(IRpcRequest<>));
+            return messageTypes[0].GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IRpcRequest<>));
         }
     }
 }

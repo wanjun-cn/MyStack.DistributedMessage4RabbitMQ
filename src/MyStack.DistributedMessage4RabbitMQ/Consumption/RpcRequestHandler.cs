@@ -47,7 +47,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
             if (eventData == null)
                 return;
 
-
             string replyMessage = "";
             try
             {
@@ -68,6 +67,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
                 var replyRoutingKey = RoutingKeyProvider.GetValue(properties.ReplyTo);
                 //_logger?.LogInformation(@"[{RoutingKey}]Reply message: {ReplyMessage}.", replyRoutingKey, replyMessage);
                 channel.BasicPublish(exchange: eventArgs.Exchange, routingKey: properties.ReplyTo, mandatory: false, basicProperties: replyProperties, body: replyBytes);
+                channel.BasicAck(eventArgs.DeliveryTag, false);
             }
         }
     }

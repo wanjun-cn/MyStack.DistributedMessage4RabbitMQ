@@ -58,6 +58,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
                     await RetryHandle.HandleAsync(channel, eventArgs, messageType);
                 }
             }
+            channel.BasicAck(eventArgs.DeliveryTag, false);
         }
         protected virtual async Task HandleMessage(Type messageType, BasicDeliverEventArgs eventArgs, string receivedMessage, CancellationToken cancellationToken)
         {
