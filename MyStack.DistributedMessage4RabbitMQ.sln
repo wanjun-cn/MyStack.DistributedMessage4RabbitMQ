@@ -17,6 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStack.DistributedMessage4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStack.DistributedMessage4RabbitMQ.Test", "tests\MyStack.DistributedMessage4RabbitMQ.Test\MyStack.DistributedMessage4RabbitMQ.Test.csproj", "{648522F5-675F-4BF4-A859-459CCE1692F8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C217D8BB-06F6-485B-9339-650CE2FAD1EE}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

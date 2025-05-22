@@ -5,31 +5,26 @@
 		<TargetFrameworks>net6.0;net7.0;net8.0;</TargetFrameworks>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>DistributedMessage4RabbitMQ</Title>
-		<Version>1.0.5</Version>
+		<Version>1.0.11</Version>
 		<Authors>Jun Wan</Authors>
 		<Company>Jun Wan</Company>
 		<PackageIcon>icon.png</PackageIcon>
 		<Description>
-			An open-source lightweight distributed messaging bus library (RabbitMQ).
+An open-source lightweight distributed messaging bus library (RabbitMQ).
 
-			Add Service:
-			services.AddDistributedMessage4RabbitMQ(configure =&gt;
-			{
-			configure.HostName = "localhost";
-			configure.VirtualHost = "/";
-			configure.Port = 5672;
-			configure.UserName = "admin";
-			configure.Password = "admin";
-			configure.QueueOptions.Name = "MyStack";
-			configure.ExchangeOptions.Name = "MyStack";
-			configure.ExchangeOptions.ExchangeType = "topic";
-			configure.RPCTimeout = 2000;
-			},
-			Assembly.GetExecutingAssembly());
+Add Service:
+services.AddDistributedMessage4RabbitMQ(configure =&gt;
+{
+configure.HostName = "localhost";
+configure.VirtualHost = "/";
+configure.Port = 5672;
+configure.UserName = "admin";
+configure.Password = "admin";
+},
+Assembly.GetExecutingAssembly());
 
-			Publish a Message:
-			await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
-
+Publish a Message:
+await messageBus.PublishAsync(new HelloMessage() { Message = "Hello" });
 		</Description>
 		<Title>Microsoft.Extensions.DistributedMessage4RabbitMQ</Title>
 		<RootNamespace>Microsoft.Extensions.DistributedMessage4RabbitMQ</RootNamespace>

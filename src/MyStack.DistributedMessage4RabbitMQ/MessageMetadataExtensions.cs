@@ -6,16 +6,16 @@
     public static class MessageMetadataExtensions
     {
         /// <summary>
-        /// Adds RabbitMQ request headers.
+        /// Adds RabbitMQ message headers.
         /// </summary>
-        /// <param name="meta">The message metadata object.</param>
-        /// <param name="name">The name of the request header.</param>
-        /// <param name="value">The value of the request header.</param>
+        /// <param name="metadata">The message metadata object.</param>
+        /// <param name="name">The name of the header.</param>
+        /// <param name="value">The value of the header.</param>
         /// <returns></returns>
-        public static MessageMetadata AddRabbitHeaders(this MessageMetadata meta, string name, string value)
+        public static MessageMetadata AddMessageHeader(this MessageMetadata metadata, string name, string value)
         {
-            meta.TryAdd($"{MyStackConsts.RABBITMQ_HEADER}{name}", value);
-            return meta;
+            metadata.TryAdd($"{MyStackConsts.MESSAGE_HEADER}{name}", value);
+            return metadata;
         }
     }
 }

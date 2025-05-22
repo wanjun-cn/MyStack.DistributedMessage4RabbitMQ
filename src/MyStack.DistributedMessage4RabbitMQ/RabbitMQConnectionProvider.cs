@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
@@ -7,32 +8,33 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
 {
     public class RabbitMQConnectionProvider
     {
-        private readonly SemaphoreSlim _connectionLock = new(initialCount: 1, maxCount: 1);
-        private readonly RabbitMQOptions _options;
+        protected SemaphoreSlim ConnectionLock { get; }
+        protected RabbitMQOptions Options { get; }
         public RabbitMQConnectionProvider(IOptions<RabbitMQOptions> optionsAccessor)
         {
-            _options = optionsAccessor.Value;
+            Options = optionsAccessor.Value;
+            ConnectionLock = new(initialCount: 1, maxCount: 1);
         }
 
-        public async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken)
+        public virtual async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken)
         {
             IConnection connection;
-            await _connectionLock.WaitAsync(cancellationToken);
+            await ConnectionLock.WaitAsync(cancellationToken);
             try
             {
                 ConnectionFactory factory = new()
                 {
-                    UserName = _options.UserName,
-                    Password = _options.Password,
-                    VirtualHost = _options.VirtualHost,
-                    HostName = _options.HostName,
-                    Port = _options.Port
+                    UserName = Options.UserName,
+                    Password = Options.Password,
+                    VirtualHost = Options.VirtualHost,
+                    HostName = Options.HostName,
+                    Port = Options.Port
                 };
                 connection = factory.CreateConnection();
             }
             finally
             {
-                _connectionLock.Release();
+                ConnectionLock.Release();
             }
             return connection;
         }

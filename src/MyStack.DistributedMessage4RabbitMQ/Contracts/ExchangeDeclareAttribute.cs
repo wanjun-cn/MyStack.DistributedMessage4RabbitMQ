@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts
 {
     /// <summary>
     /// Represents an attribute for declaring an exchange.
@@ -25,10 +24,6 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// Whether the exchange is auto-deleted. If there are no queues bound to it, it will be deleted automatically.
         /// </summary>
         public bool? AutoDelete { get; set; }
-        /// <summary>
-        /// Additional arguments for the exchange.
-        /// </summary>
-        public Dictionary<string, object?>? Arguments { get; set; }
         /// <summary>
         /// Initializes an instance of the exchange declaration attribute.
         /// </summary>

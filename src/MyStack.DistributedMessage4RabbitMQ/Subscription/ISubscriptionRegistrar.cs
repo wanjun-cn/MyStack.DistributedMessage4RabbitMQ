@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Subscription
 {
     /// <summary>
     /// Represents an interface for subscription registration.
     /// </summary>
-    internal interface ISubscriptionRegistrar
+    public interface ISubscriptionRegistrar
     {
         /// <summary>
         /// Subscribes to a collection of message types.

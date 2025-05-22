@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration
 {
     /// <summary>
     /// Represents the value for defining a queue.
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// </summary>
         public bool AutoDelete { get; set; }
         /// <summary>
-        /// Additional arguments for the queue.
+        /// Additional arguments for the exchange.
         /// </summary>
         public Dictionary<string, object?>? Arguments { get; set; }
     }
