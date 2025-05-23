@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration;
@@ -45,12 +44,13 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-            var channel = connection.CreateModel();
+            var channel = await _connectionProvider.CreateChannelAsync(cancellationToken);
             _queueInitializer.BuildQueues(channel);
             channel.BasicQos(prefetchSize: 0, prefetchCount: _options.PrefetchCount, global: false);
             await RegisterConsumesAsync(channel, _queueInitializer.GetQueueNames(), cancellationToken);
         }
+
+      
 
         private async Task RegisterConsumesAsync(IModel channel, IReadOnlyList<string> queueNames, CancellationToken cancellationToken)
         {
@@ -87,7 +87,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
                     finally
                     {
                         stopwatch.Stop();
-                        _logger.LogInformation("Message processed in {Elapsed} with routing key: {RoutingKey}.", stopwatch.Elapsed, eventArgs.RoutingKey);
+                        _logger.LogInformation("Processed message with routing key: {RoutingKey} in {Elapsed}.", eventArgs.RoutingKey, stopwatch.Elapsed);
                     }
                 };
 

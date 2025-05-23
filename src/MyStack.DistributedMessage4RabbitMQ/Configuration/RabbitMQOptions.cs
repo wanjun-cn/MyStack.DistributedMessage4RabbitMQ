@@ -146,6 +146,20 @@
             }
         }
 
+        private ushort? _reconnectCountCount;
+        public ushort ReconnectCount
+        {
+            get
+            {
+                _reconnectCountCount ??= 0;
+                return _reconnectCountCount.Value;
+            }
+            set
+            {
+                _reconnectCountCount = value;
+            }
+        } 
+
         /// <summary>
         /// Gets the exchange configuration options
         /// </summary>
