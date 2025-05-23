@@ -74,8 +74,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         public virtual async Task PublishAsync(object eventData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using var connection = await RabbitMQProvider.GetConnectionAsync(cancellationToken);
-            using var channel = connection.CreateModel();
+            using var channel = await RabbitMQProvider.CreateChannelAsync(cancellationToken);
             if (eventData == null)
                 throw new ArgumentNullException(nameof(eventData), "Event data cannot be null");
             object? messageData = eventData;
@@ -113,8 +112,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         public virtual async Task<TRpcResponse?> SendAsync<TRpcResponse>(IRpcRequest<TRpcResponse> requestData, MessageMetadata? metadata = null, CancellationToken cancellationToken = default) where TRpcResponse : class
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using var connection = await RabbitMQProvider.GetConnectionAsync(cancellationToken);
-            using var channel = connection.CreateModel();
+            using var channel = await RabbitMQProvider.CreateChannelAsync(cancellationToken);
             if (requestData == null)
                 throw new ArgumentNullException(nameof(requestData), "Event data cannot be null");
             if (metadata != null)

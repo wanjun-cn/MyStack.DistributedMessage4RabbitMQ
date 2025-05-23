@@ -13,6 +13,7 @@ namespace MyStack.DistributedMessage4RabbitMQ.Consumer
     {
         static void Main(string[] args)
         {
+
             var builder = new HostBuilder()
                .ConfigureHostConfiguration(configure =>
                {
@@ -23,16 +24,16 @@ namespace MyStack.DistributedMessage4RabbitMQ.Consumer
                {
                    services.AddLogging(logging =>
                    {
-                       logging.AddConsole();
+                       logging.AddConsole(c => c.TimestampFormat = "[yyyy-MM-dd HH:mm:ss]");
                    });
                    services.AddDistributedMessage4RabbitMQ(configure =>
                    {
-                       configure.HostName = "127.0.0.1";
+                       configure.HostName = "192.168.2.186";
                        configure.VirtualHost = "/";
                        configure.Port = 5672;
                        configure.UserName = "admin";
                        configure.Password = "admin";
-                       configure.PrefetchCount = 5;
+                       configure.PrefetchCount = 1;
                        configure.RoutingKeyPrefix = $"*.*.";
                        configure.ExchangeOptions.Name = "MultiwayLogistics";
                        configure.ExchangeOptions.ExchangeType = "topic";

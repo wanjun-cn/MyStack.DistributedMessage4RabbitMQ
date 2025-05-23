@@ -15,8 +15,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
     {
         protected RabbitMQOptions Options { get; }
         protected ILogger Logger { get; }
-        public RetryHandler(
-            IOptions<RabbitMQOptions> options,
+        public RetryHandler(IOptions<RabbitMQOptions> options,
             ILogger<RetryHandler> logger)
         {
             Options = options.Value;
@@ -33,28 +32,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
                 }
                 if (maxRetryCount > 0)
                 {
-                    int retryCount = 0;
-                    if (eventArgs.BasicProperties.Headers != null && eventArgs.BasicProperties.Headers.TryGetHeaderValue("x-retry-count", out var retryCountValue) && retryCountValue != null)
-                    {
-                        _ = int.TryParse(retryCountValue.ToString(), out retryCount);
-                    }
-
-                    if (retryCount <= maxRetryCount)
-                    {
-                        var properties = channel.CreateBasicProperties();
-                        properties.Headers = eventArgs.BasicProperties.Headers;
-                        properties.Headers ??= new Dictionary<string, object>();
-                        if (properties.Headers.ContainsKey("x-retry-count"))
-                            properties.Headers["x-retry-count"] = retryCount + 1;
-                        else
-                            properties.Headers.TryAdd("x-retry-count", retryCount + 1);
-                        Logger.LogInformation("Retrying message with RoutingKey: {RoutingKey}, RetryCount: {RetryCount}, MaxRetryCount: {MaxRetryCount}.", eventArgs.RoutingKey, retryCount, maxRetryCount);
-                        channel.BasicPublish(eventArgs.Exchange, eventArgs.RoutingKey, properties, eventArgs.Body.ToArray());
-                        channel.BasicAck(eventArgs.DeliveryTag, false);
-                    }
-                    else
-                        // If the max retry count is reached, send it to the dead letter queue or the original queue.
-                        BasicNack(channel, eventArgs, messageType);
+                    HandleMaxRetry(channel, eventArgs, messageType, maxRetryCount);
                 }
                 else
                 {
@@ -68,6 +46,30 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
             }
             await Task.CompletedTask;
         }
+
+        private void HandleMaxRetry(IModel channel, BasicDeliverEventArgs eventArgs, Type messageType, int maxRetryCount)
+        {
+            int retryCount = 0;
+            if (eventArgs.BasicProperties.Headers != null && eventArgs.BasicProperties.Headers.TryGetHeaderValue("x-retry-count", out var retryCountValue) && retryCountValue != null)
+                _ = int.TryParse(retryCountValue.ToString(), out retryCount);
+            if (retryCount <= maxRetryCount)
+            {
+                var properties = channel.CreateBasicProperties();
+                properties.Headers = eventArgs.BasicProperties.Headers;
+                properties.Headers ??= new Dictionary<string, object>();
+                if (properties.Headers.ContainsKey("x-retry-count"))
+                    properties.Headers["x-retry-count"] = retryCount + 1;
+                else
+                    properties.Headers.TryAdd("x-retry-count", retryCount + 1);
+                Logger.LogInformation("Retrying message with RoutingKey: {RoutingKey}, RetryCount: {RetryCount}, MaxRetryCount: {MaxRetryCount}.", eventArgs.RoutingKey, retryCount, maxRetryCount);
+                channel.BasicPublish(eventArgs.Exchange, eventArgs.RoutingKey, properties, eventArgs.Body.ToArray());
+                channel.BasicAck(eventArgs.DeliveryTag, false);
+            }
+            else
+                // If the max retry count is reached, send it to the dead letter queue or the original queue.  
+                BasicNack(channel, eventArgs, messageType);
+        }
+
         protected virtual void BasicNack(IModel channel, BasicDeliverEventArgs eventArgs, Type messageType)
         {
             var deadLetterAttribute = messageType.GetCustomAttribute<DeadLetterAttribute>();

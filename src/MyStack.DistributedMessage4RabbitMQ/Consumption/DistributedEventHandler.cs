@@ -45,20 +45,23 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
             var messageTypes = SubscriptionService.GetMessageTypes(eventArgs.RoutingKey);
             if (messageTypes == null)
                 return;
+            bool isHandled = false;
             foreach (var messageType in messageTypes)
             {
                 try
                 {
                     await HandleMessage(messageType, eventArgs, receivedMessage, cancellationToken);
+                    isHandled = true;
                 }
                 catch (Exception ex)
                 {
+                    isHandled = false;
                     Logger.LogError(ex, "An error occurred while processing the message of type {MessageType}.", messageType.FullName);
-
                     await RetryHandle.HandleAsync(channel, eventArgs, messageType);
                 }
             }
-            channel.BasicAck(eventArgs.DeliveryTag, false);
+            if(isHandled)
+                channel.BasicAck(eventArgs.DeliveryTag, false);
         }
         protected virtual async Task HandleMessage(Type messageType, BasicDeliverEventArgs eventArgs, string receivedMessage, CancellationToken cancellationToken)
         {
@@ -92,7 +95,5 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Consumption
                 }
             }
         }
-
-
     }
 }
