@@ -134,7 +134,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
             basicProperties.Headers = new Dictionary<string, object>();
             SetHeaders(requestData, basicProperties, metadata);
 
-            channel.QueueBind(replyQueueName, exchangeName, basicProperties.ReplyTo);
+            channel.QueueBind(replyQueueName, exchangeName, "#." + basicProperties.ReplyTo);
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (_, ea) =>
             {
