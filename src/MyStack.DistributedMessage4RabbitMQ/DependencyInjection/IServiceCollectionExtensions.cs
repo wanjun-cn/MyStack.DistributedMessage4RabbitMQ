@@ -72,8 +72,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<IMessageSerializer, JsonMessageSerializer>();
             services.AddTransient<QueueInitializer>();
-            services.AddTransient<DistributedEventHandler>();
-            services.AddTransient<RpcRequestHandler>();
+            services.AddSingleton<DistributedEventHandler>();
+            services.AddSingleton<RpcRequestHandler>();
             services.AddTransient<RetryHandler>();
 
             return services;
