@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration
 {
     /// <summary>
     /// Represents the value of an exchange.

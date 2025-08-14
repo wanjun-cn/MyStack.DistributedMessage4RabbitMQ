@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ;
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Serialization;
 
 public interface IMessageSerializer
 {

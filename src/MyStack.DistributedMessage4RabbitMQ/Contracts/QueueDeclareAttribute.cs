@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts
 {
     /// <summary>
     /// Represents the attribute for defining a queue.
@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ
         /// Whether the queue is automatically deleted.
         /// </summary>
         public bool? AutoDelete { get; set; }
+
         /// <summary>
         /// Additional arguments for the queue.
         /// </summary>

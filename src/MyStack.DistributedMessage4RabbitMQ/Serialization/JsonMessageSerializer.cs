@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Microsoft.Extensions.DistributedMessage4RabbitMQ;
+namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Serialization;
 
 public class JsonMessageSerializer : IMessageSerializer
 {

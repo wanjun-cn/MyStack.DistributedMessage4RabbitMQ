@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DistributedMessage4RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,37 +20,39 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                })
                .ConfigureServices((context, services) =>
                {
-               services.AddLogging(logging =>
-               {
-                   logging.AddConsole();
-               });
+                   services.AddLogging(logging =>
+                   {
+                       logging.AddConsole();
+                   });
                    services.AddDistributedMessage4RabbitMQ(configure =>
                    {
-                       configure.HostName = "localhost";
+                       configure.HostName = "127.0.0.1";
                        configure.VirtualHost = "/";
                        configure.Port = 5672;
                        configure.UserName = "admin";
                        configure.Password = "admin";
-                       configure.QueueOptions.Name = "MyStack";
-                       configure.ExchangeOptions.Name = "MyStack";
+                       configure.RoutingKeyPrefix = $"123.123.";
+                       configure.ExchangeOptions.Name = "MultiwayLogistics";
                        configure.ExchangeOptions.ExchangeType = "topic";
-                       configure.RPCTimeout = 2000000;
+                       configure.ExchangeOptions.Durable = true;
+                       configure.QueueOptions.Name = "Identity";
+                       configure.QueueOptions.Durable = true;
                    },
-                 
+
 
                    Assembly.GetExecutingAssembly());
-                 
 
-        });
+
+               });
 
             var app = builder.Build();
 
-        var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
-        var hello = new HelloMessage()
-        {
-            Message = "Hello World"
-        };
-        hello.Metadata.AddRabbitHeaders("key1", "key1");
+            var messageBus = app.Services.GetRequiredService<IDistributedMessageBus>();
+            var hello = new HelloMessage()
+            {
+                Message = "Hello World"
+            };
+            hello.Metadata.AddMessageHeader("key1", "key1");
             messageBus.PublishAsync(hello);
             messageBus.PublishAsync(new WrappedData());
             // Publish a message and wait for a reply
@@ -60,13 +61,19 @@ namespace MyStack.DistributedMessage4RabbitMQ.Producer
                 var i = Console.ReadLine();
                 if (i == "Q")
                     break;
-                var ping = new Ping()
+                try
                 {
-                    SendBy = "A"
-                };
-        var pongMessage = messageBus.SendAsync(ping).GetAwaiter().GetResult();
-        Console.WriteLine(pongMessage?.ReplyBy);
+                    var ping = new Ping()
+                    {
+                        SendBy = "A"
+                    };
+                    var pongMessage = messageBus.SendAsync(ping).GetAwaiter().GetResult();
+                    Console.WriteLine(pongMessage?.ReplyBy);
+                }
+                catch
+                {
+                }
             }
-}
+        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.Extensions.DistributedMessage4RabbitMQ;
+using Microsoft.Extensions.DistributedMessage4RabbitMQ.Serialization;
 using Newtonsoft.Json;
 
-namespace MyStack.DistributedMessage4RabbitMQ.Producer
+namespace MyStack.DistributedMessage4RabbitMQ.Shared
 {
     public class CustomJsonMessageSerializer : JsonMessageSerializer
     {

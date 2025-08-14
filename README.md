@@ -1,16 +1,16 @@
-# MyStack.DistributedMessage4RabbitMQ
+# DistributedMessage4RabbitMQ
 
 An open-source lightweight message bus library (RabbitMQ) that supports publish/subscribe and RPC.
 
 | nuget      | stats |
 | ----------- | ----------- | 
-| [![nuget](https://img.shields.io/nuget/v/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/packages/MyStack.DistributedMessage4RabbitMQ)    | [![stats](https://img.shields.io/nuget/dt/MyStack.DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/stats/packages/MyStack.DistributedMessage4RabbitMQ?groupby=Version)         |
+| [![nuget](https://img.shields.io/nuget/v/DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/packages/DistributedMessage4RabbitMQ)    | [![stats](https://img.shields.io/nuget/dt/DistributedMessage4RabbitMQ.svg?style=flat-square)](https://www.nuget.org/stats/packages/DistributedMessage4RabbitMQ?groupby=Version)         |
 
-# Install MyStack.DistributedMessage4RabbitMQ
+# Install DistributedMessage4RabbitMQ
 
 You can install via NuGet:
 ```csharp
-Install-Package MyStack.DistributedMessage4RabbitMQ
+Install-Package DistributedMessage4RabbitMQ
 
 # Getting Started
 
@@ -23,10 +23,6 @@ services.AddDistributedMessage4RabbitMQ(configure =>
     configure.Port = 5672;
     configure.UserName = "admin";
     configure.Password = "admin";
-    configure.QueueOptions.Name = "MyStack";
-    configure.ExchangeOptions.Name = "MyStack";
-    configure.ExchangeOptions.ExchangeType = "topic";
-    configure.RPCTimeout = 2000;
 },
 Assembly.GetExecutingAssembly());
 ```
@@ -71,7 +67,7 @@ var hello = new HelloMessage()
 {
     Message = "Hello World"
 };
-hello.Metadata.Add("key1", "value");
+hello.Metadata.AddMessageHeader("key1", "value");
 messageBus.PublishAsync(hello);
 ```
 
@@ -134,6 +130,25 @@ public class Ping : IRpcRequest<Pong>
 ### Send Request
 ```
 var pongMessage = messageBus.SendAsync(ping);
+```
+
+## 4、Dead Letter
+### Define Message
+```
+[QueueBind("HelloMessage", QueueName = "Hello")]
+[DeadLetter(messageType: typeof(HelloMessageDeadLetter))]
+public class HelloMessage : DistributedEventBase
+{
+    public string Message { get; set; } = default!;
+}
+```
+
+### Define Dead Letter Message
+```
+[QueueBind("HelloMessageDeadLetter", QueueName = "HelloDeadLetter", ExchangeName = "DeadLetter")]
+public class HelloMessageDeadLetter : DistributedEventBase
+{
+}
 ```
 
 # License

@@ -6,9 +6,9 @@
     public static class MyStackConsts
     {
         /// <summary>
-        /// The prefix for RabbitMQ request headers.
+        /// The prefix for RabbitMQ message headers.
         /// </summary>
-        public const string RABBITMQ_HEADER = "rabbitmq.";
+        public const string MESSAGE_HEADER = "rabbitmq.";
         /// <summary>
         /// The default RabbitMQ exchange name.
         /// </summary>

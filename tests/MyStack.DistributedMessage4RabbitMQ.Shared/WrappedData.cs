@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ;
+﻿using Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts;
 
 namespace MyStack.DistributedMessage4RabbitMQ.Shared
 {
     [QueueDeclare("WrappedData")]
     [QueueBind("WrappedData")]
-    [Headers("A", "A")]
+    [MessageHeader("A", "A")]
     public class WrappedData
     {
 
