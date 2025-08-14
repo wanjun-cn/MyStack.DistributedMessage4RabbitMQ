@@ -20,7 +20,10 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts
         /// The routing key.  
         /// </summary>  
         public string RoutingKey { get; private set; } = default!;
-
+        /// <summary>
+        /// When the prefix is enabled, the routing key will append the globally set prefix string
+        /// </summary>
+        public bool EnablePrefix { get; set; }
         /// <summary>  
         /// Initializes a queue binding.  
         /// </summary>  
@@ -28,6 +31,7 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Contracts
         public QueueBindAttribute(string routingKey)
         {
             RoutingKey = routingKey;
+            EnablePrefix = true;
         }
     }
 }

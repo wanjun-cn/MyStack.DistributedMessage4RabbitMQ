@@ -41,11 +41,16 @@ namespace Microsoft.Extensions.DistributedMessage4RabbitMQ.Configuration
             var queueDeclareValue = _queueDeclareValueProvider.GetValue(messageType, _options.QueueOptions);
             var queueBindAttribute = messageType.GetCustomAttribute<QueueBindAttribute>();
             var xArgumentAttributes = messageType.GetCustomAttributes<XArgumentAttribute>().Where(x => x.Type == XArgumentType.QueueBind);
+            // 构建路由键，当未设置自定义路由键时，则使用消息类型的完全限定名
+            var routingKey = !string.IsNullOrEmpty(queueBindAttribute?.RoutingKey) ? queueBindAttribute.RoutingKey : messageType.FullName!;
+            // 检测是否启用路由键前缀，启用时追加前缀
+            if (queueBindAttribute?.EnablePrefix ?? true)
+                routingKey = _routingKeyProvider.GetValue(routingKey);
             QueueBindValue queueBindValue = new()
             {
                 QueueName = (!string.IsNullOrEmpty(queueBindAttribute?.QueueName) ? queueBindAttribute.QueueName : queueDeclareValue.Name ?? MyStackConsts.DEFAULT_QUEUE_NAME)!,
                 ExchangeName = (!string.IsNullOrEmpty(queueBindAttribute?.ExchangeName) ? queueBindAttribute.ExchangeName : exchangeDeclareValue.Name ?? MyStackConsts.DEFAULT_EXCHANGE_NAME)!,
-                RoutingKey = _routingKeyProvider.GetValue(!string.IsNullOrEmpty(queueBindAttribute?.RoutingKey) ? queueBindAttribute.RoutingKey : messageType.FullName!),
+                RoutingKey = routingKey,
                 Arguments = new Dictionary<string, object?>()
             };
             if (xArgumentAttributes != null)
